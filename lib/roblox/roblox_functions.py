@@ -1,6 +1,10 @@
 import robloxpy
 import requests
 import os
+from lib.sql.queries import get_rank, get_highest_possible_rank, update_rank
+
+COOKIE = os.getenv('COOKIE')
+robloxpy.User.Internal.SetCookie(COOKIE)
 
 def get_roblox_ids(usernames):
     usernames = usernames.split()
@@ -44,3 +48,28 @@ def get_roblox_ids(usernames):
     results = list(set(results))
     
     return results
+
+
+def check_for_promotions(users):
+    for user in users:
+        # get the current rank of user
+        rank = get_rank(user)
+        
+        # if they are a diplomat or above don't change rank
+        if rank >= 10:
+            continue
+
+        deserved_rank = get_highest_possible_rank(user)
+
+        if rank != deserved_rank:
+            print(f"Promote this person to {deserved_rank}")
+            response = robloxpy.User.Groups.Internal.ChangeRank(16413178,id,rank)
+            if response == 'Sent':
+                update_rank(user, deserved_rank)
+        else:
+            print(f"{user} is the correct rank.")
+
+
+
+        # if they can be promoted double check their rank on the roblox api before promoting them 
+        # in the case a conscript was manually promoted to diplomat not checking might demote them to solider

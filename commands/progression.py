@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from lib.sql.queries import award
-from lib.roblox.roblox_functions import get_roblox_ids
+from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions
 
 events = ['Raid', 'Defense','Defense Training','Prism Training']
 
@@ -25,6 +25,7 @@ class Progression(commands.Cog):
         status = award(event,user_ids)
         if status == 'Success':
             await ctx.respond(f'Awarded {users} a {event} point!')
+            check_for_promotions(user_ids)
         else:
             await ctx.respond(f'Something went wrong! ({status})')
 

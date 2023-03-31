@@ -67,4 +67,4 @@ def read_query(connection, query):
 # create_database(server_connection,'CREATE DATABASE guf_test')
 # db = create_db_connection('localhost','root','','guf_test')
 # for query in init_queries:
-#     execute_query(db, query)
+#     print(execute_query(db, query))

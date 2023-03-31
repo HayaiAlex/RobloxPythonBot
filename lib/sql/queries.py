@@ -27,7 +27,7 @@ def award(event, users):
     
     # create records for those users
     if new_ids:
-        new_users = [(id,0,0,0,0) for id in new_ids]
+        new_users = [(id,1,0,0,0,0) for id in new_ids]
         create_users = f"""
         INSERT INTO users
         VALUES {', '.join(map(str,new_users))}
@@ -49,3 +49,40 @@ def award(event, users):
         return result
     else:
         return f'Error updating {event} column {result}'
+    
+def update_rank(id, rank):
+    query = f"""
+    UPDATE users SET Rank_ID = {rank} WHERE User_ID = {id}
+    """
+    result = execute_query(db, query)
+    if result == 'Success':
+        return result
+    else:
+        return f'Error updating rank {result}'
+
+def get_rank(id):
+    query = f"""
+    SELECT Rank_ID FROM users WHERE User_ID = {id}
+    """
+    results = read_query(db, query)
+    try:
+        return results[0][0]
+    except:
+        return f'Error checking users {results}'
+
+def get_highest_possible_rank(id):
+    query = f"""
+    SELECT MAX(rank_requirements.Rank_ID)
+    FROM rank_requirements
+    CROSS JOIN users 
+    WHERE users.User_ID = {id}
+    AND users.Raids >= rank_requirements.Raids
+    AND users.Defenses >= rank_requirements.Defenses
+    AND users.Defense_Training >= rank_requirements.Defense_Training
+    AND users.Prism_Trainings >= rank_requirements.Prism_Trainings;
+    """
+    results = read_query(db, query)
+    try:
+        return results[0][0]
+    except:
+        return f'Error checking users {results}'
