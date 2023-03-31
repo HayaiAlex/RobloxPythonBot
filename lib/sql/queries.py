@@ -1,0 +1,51 @@
+from lib.sql.sql import create_db_connection, execute_query, read_query
+
+db = create_db_connection('localhost','root','','guf_test')
+
+def award(event, users):
+    print(users)
+    if not users:
+        return 'No users found'
+    
+    # get a list of users that exist/do not exist in the database
+    check_users = f"""
+    SELECT User_ID FROM users WHERE User_ID IN ({', '.join(map(str,users))})
+    """
+    print(check_users)
+    results = read_query(db,check_users)
+    try:
+        if results.find('Error'):
+            return f'Error checking users {results}'
+    except:
+        pass
+    
+    print(results)
+    ids = [user[0] for user in results]
+    new_ids = [id for id in users if id not in ids]
+    print(f"ids: {ids}")
+    print(f"new ids: {new_ids}")
+    
+    # create records for those users
+    if new_ids:
+        new_users = [(id,0,0,0,0) for id in new_ids]
+        create_users = f"""
+        INSERT INTO users
+        VALUES {', '.join(map(str,new_users))}
+        """
+        result = execute_query(db, create_users)
+        if not result == 'Success':
+            return f"Error trying to create new user records {result}"
+
+    # add 1 to event for all users
+    db_events = {'Raid':'Raids','Defense':'Defenses','Defense Training':'Defense_Trainings','Prism Training':'Prism_Trainings'}
+    event = db_events[event]
+    award_event = f"""
+    UPDATE users
+    SET {event} = {event} + 1
+    WHERE User_ID IN ({', '.join(map(str,users))})
+    """
+    result = execute_query(db, award_event)
+    if result == 'Success':
+        return result
+    else:
+        return f'Error updating {event} column {result}'
