@@ -86,3 +86,14 @@ def get_highest_possible_rank(id):
         return results[0][0]
     except:
         return f'Error checking users {results}'
+    
+def get_data_from_id(id):
+    query = f"""
+    SELECT * FROM users WHERE User_ID = {id}
+    """
+    results = read_query(db, query)
+    try:
+        columns = ['User_ID','Rank_ID','Raids','Defenses','Defense Trainings','Prism Trainings']
+        return dict(zip(columns,results[0]))
+    except:
+        return f'Error finding userdata {results}'
