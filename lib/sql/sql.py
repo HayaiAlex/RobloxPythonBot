@@ -44,7 +44,10 @@ def execute_query(connection, query):
     try:
         cursor.execute(query)
         connection.commit()
-        return 'Success'
+        if cursor.rowcount > 0:
+            return 'Success'
+        else:
+            return 'No rows affected'
     except Error as err:
         return f"Error: '{err}'"
 

@@ -1,10 +1,8 @@
-import robloxpy
-import requests
-import os
-from lib.sql.queries import get_rank, get_highest_possible_rank, update_rank
+import robloxpy, requests, os
+from lib.sql.queries import DB
 
-COOKIE = os.getenv('COOKIE')
-robloxpy.User.Internal.SetCookie(COOKIE)
+GROUP_ID = os.getenv('GROUP_ID')
+db = DB()
 
 def get_usernames_from_ids(ids):
     try:
@@ -35,12 +33,12 @@ def get_roblox_ids(usernames):
             GUILD_ID = os.getenv('DISCORD_GUILD')
             url = f"http://registry.rover.link/api/guilds/{GUILD_ID}/discord-to-roblox/{username[2:-1]}"
             request = requests.get(url,headers={'Authorization': f"Bearer {API}"})
-            print(request)
             response = request.json()
-            print(response)
 
             if response.get('robloxId'):
-                results.append({username:response.get('cachedUsername'), id:response.get('robloxId')})
+                results.append({'username':response.get('cachedUsername'), 'id':response.get('robloxId')})
+            else:
+                results.append({'username':username, 'id':None})
     
     
     remaining_usernames = [u for u in usernames if u not in results and not username.startswith('<@')]
@@ -56,6 +54,10 @@ def get_roblox_ids(usernames):
             # May not include all ids if a user with this name on roblox does not exist
             for user in response:
                 results.append({'username':user.get('name'), 'id':user.get('id')})
+
+            for user in remaining_usernames:
+                if user not in [user['username'] for user in results]:
+                    results.append({'username':user, 'id':None})
         except:
             pass
 
@@ -65,34 +67,40 @@ def get_roblox_ids(usernames):
 
 def check_for_promotions(users):
     for user in users:
-        # get the current rank of user
-        rank = get_rank(user)
+        # get the current rank of user on the database
+        rank = db.get_user_rank(user)
         
         # if they are a diplomat or above don't change rank
         if rank >= 10:
             continue
 
-        deserved_rank = get_highest_possible_rank(user)
+        deserved_rank = db.get_highest_possible_rank(user)
 
         if rank != deserved_rank:
-            print(f"Promote this person to {deserved_rank}")
-            response = robloxpy.User.Groups.Internal.ChangeRank(16413178,id,rank)
+            # if they can be promoted double check their rank on the roblox api before promoting them 
+            # in the case a conscript was manually promoted to diplomat not checking might demote them to solider
+            role = get_role_in_group(user,GROUP_ID)
+            if role['rank'] >= 10:
+                continue
+            
+            print(f"Promote user {user} to {deserved_rank}")
+            response = robloxpy.User.Groups.Internal.ChangeRank(GROUP_ID,user,rank)
             if response == 'Sent':
-                update_rank(user, deserved_rank)
+                db.update_rank(user, deserved_rank)
         else:
             print(f"{user} is the correct rank.")
 
 
 
-        # if they can be promoted double check their rank on the roblox api before promoting them 
-        # in the case a conscript was manually promoted to diplomat not checking might demote them to solider
 
 def get_role_in_group(user_id, group_id):
     url = f"https://groups.roblox.com/v2/users/{user_id}/groups/roles"
     request = requests.get(url)
     response = request.json()['data']
-    role = [data['role'] for data in response if data['group']['id'] == group_id]
-    if len(role)>0:
+    role = [datum['role'] for datum in response if datum['group']['id'] == int(group_id)]
+    try:
         return role[0]
-    else:
+    except:
         return {'name':'[0] Visitor','rank':0}
+    
+

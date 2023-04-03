@@ -1,26 +1,15 @@
-# bot.py
-import os
-
-import discord
+import json
+import discord, robloxpy, os, requests
 from dotenv import load_dotenv
 from discord.ext import commands
 
-load_dotenv()
+load_dotenv(override=True)
 TOKEN = os.getenv('DISCORD_TOKEN')
+COOKIE = os.getenv('COOKIE')
+print(robloxpy.User.Internal.SetCookie(COOKIE))
+print(robloxpy.Utils.CheckCookie())
 
 bot = commands.Bot()
-
-@bot.slash_command(name="hello", description = "Say hello to the bot")
-async def hello(ctx): 
-    await ctx.respond("Hi there :)")
-    
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send('You do not have the correct role for this command.')
-
-
-
 
 bot.load_extension('commands.progression')
 
