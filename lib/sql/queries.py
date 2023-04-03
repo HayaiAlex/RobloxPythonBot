@@ -65,16 +65,16 @@ class DB():
 
     def get_user_rank(self, id):
         query = f"""
-        SELECT Rank_ID FROM users WHERE User_ID = {id}
+        SELECT users.Rank_ID, rank_requirements.Rank_Name, rank_requirements.Role_ID FROM users JOIN rank_requirements ON users.Rank_ID = rank_requirements.Rank_ID WHERE User_ID = {id};
         """
         results = read_query(self.db, query)
         try:
-            return int(results[0][0])
+            columns = ['Rank_ID','Rank_Name','Role_ID']
+            return dict(zip(columns,results[0]))
         except:
             return f'Error checking users {results}'
         
     def get_rank(self, id):
-        print(id)
         query = f"""
         SELECT * FROM rank_requirements WHERE Rank_ID = {id}
         """
@@ -124,3 +124,13 @@ class DB():
         except:
             return f'Error finding rank requirement {results}'
         
+    def get_all_ranks(self):
+        query = f"""
+        SELECT * FROM rank_requirements
+        """
+        results = read_query(self.db, query)
+        try:
+            columns = ['Rank_ID','Rank_Name','Role_ID','Raids','Defenses','Defense Trainings','Prism Trainings']
+            return [dict(zip(columns,rank)) for rank in results]
+        except:
+            return f'Error getting all ranks {results}'

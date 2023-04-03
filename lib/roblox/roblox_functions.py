@@ -66,29 +66,29 @@ def get_roblox_ids(usernames):
 
 
 def check_for_promotions(users):
+    promoted = []
     for user in users:
         # get the current rank of user on the database
-        rank = db.get_user_rank(user)
+        rank = int(db.get_user_rank(user)['Rank_ID'])
         
-        # if they are a diplomat or above don't change rank
-        if rank >= 10:
-            continue
-
         deserved_rank = db.get_highest_possible_rank(user)
 
         if rank != deserved_rank:
-            # if they can be promoted double check their rank on the roblox api before promoting them 
+            # if they are a diplomat or above don't change rank
+            # double check their rank on the roblox api before promoting them 
             # in the case a conscript was manually promoted to diplomat not checking might demote them to solider
             role = get_role_in_group(user,GROUP_ID)
             if role['rank'] >= 10:
                 continue
-            
+
             print(f"Promote user {user} to {deserved_rank}")
             response = robloxpy.User.Groups.Internal.ChangeRank(GROUP_ID,user,rank)
             if response == 'Sent':
                 db.update_rank(user, deserved_rank)
+                promoted.append(user)
         else:
             print(f"{user} is the correct rank.")
+    return promoted
 
 
 

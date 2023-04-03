@@ -1,6 +1,7 @@
-import datetime, os, robloxpy, discord, json
+import datetime, os, robloxpy, discord, json, requests
 from discord.ext import commands
 from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions, get_role_in_group
+from lib.discord_functions import update_roles
 from lib.sql.queries import DB
 
 with open('config.json', 'r') as file:
@@ -33,7 +34,10 @@ class Progression(commands.Cog):
             else:
                 await ctx.respond(f"{award_msg}")
           
-            check_for_promotions([user.get('id') for user in awarded])
+            promoted = check_for_promotions([user.get('id') for user in awarded])
+            
+            for user in promoted:
+                update_roles(ctx, user)
         else:
             await ctx.respond(f'No events awarded. Please check your player list.')
 
@@ -45,16 +49,12 @@ class Progression(commands.Cog):
         user = get_roblox_ids(user)[0]
         try:
             user_data = db.get_data_from_id(user.get('id'))
-            requirements = db.get_rank_requirements(db.get_user_rank(user['id']) + 1)
+            requirements = db.get_rank_requirements(int(db.get_user_rank(user['id'])['Rank_ID']) + 1)
         except:
             user_data = {'User_ID': user, 'Rank_ID': 0, 'Raids': 0, 'Defenses': 0, 'Defense Trainings': 0, 'Prism Trainings': 0}
             requirements = db.get_rank_requirements(1)
          
         roles = get_role_in_group(user['id'], GROUP_ID)
-
-        # Get events for next rank
-        print(f'Requirements {requirements}')
-        print(f'User data {user_data}')
 
         embed = discord.Embed(
             title=f"{user.get('username')}",
@@ -98,6 +98,19 @@ class Progression(commands.Cog):
         embed.timestamp = datetime.datetime.now()
     
         await ctx.respond("", embed=embed)
+
+    @discord.slash_command(name="update", description = "updates a user's roles")
+    async def update_roles(self, ctx, user: discord.Option(str,required=False)):
+        if user == None:
+            user = ctx.user.mention
+        user = get_roblox_ids(user)[0]
+
+        # update their rank
+        check_for_promotions([user.get('id')])
+        # update their roles
+        update_roles(ctx, user)
+
+        await ctx.respond(f"Updated {user.get('username')}'s roles.")
 
 def setup(bot):
     bot.add_cog(Progression(bot))
