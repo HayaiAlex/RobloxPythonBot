@@ -57,7 +57,7 @@ class DB():
         query = f"""
         UPDATE users SET Rank_ID = {rank} WHERE User_ID = {id}
         """
-        result = execute_query(self. db, query)
+        result = execute_query(self.db, query)
         if result == 'Success':
             return result
         else:
@@ -122,7 +122,7 @@ class DB():
             columns = ['Raids','Defenses','Defense Trainings','Prism Trainings']
             return dict(zip(columns,results[0]))
         except:
-            return f'Error finding rank requirement {results}'
+            raise Exception(f'Error finding rank requirement {results}')
         
     def get_all_ranks(self):
         query = f"""
@@ -134,3 +134,30 @@ class DB():
             return [dict(zip(columns,rank)) for rank in results]
         except:
             return f'Error getting all ranks {results}'
+        
+    def set_event(self,id,event,num):
+        query = f"""
+        UPDATE users SET {event} = {num} WHERE User_ID = {id}  
+        """
+        result = execute_query(self.db, query)
+        if result == 'Success':
+            return result
+        else:
+            return f'Error setting rank {result}'
+        
+    def reset_events(self,id):
+        try:
+            # get pre-existing profile to reset
+            profile = self.get_data_from_id(id)
+            
+            query = f"""
+            UPDATE users SET Raids = 0, Defenses = 0, Defense_Trainings = 0, Prism_Trainings = 0 WHERE User_ID = {id}  
+            """
+            result = execute_query(self.db, query)
+            if result == 'Success':
+                return result
+            else:
+                return f'Error reseting events {result}'
+        except:
+            # they have no profile to reset
+            pass

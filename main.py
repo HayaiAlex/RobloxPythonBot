@@ -1,4 +1,4 @@
-import robloxpy, os
+import discord,robloxpy, os
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -8,8 +8,11 @@ COOKIE = os.getenv('COOKIE')
 robloxpy.User.Internal.SetCookie(COOKIE)
 print(robloxpy.Utils.CheckCookie())
 
-bot = commands.Bot()
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(intents=intents)
 
 bot.load_extension('commands.progression')
+bot.load_extension('api.webserver')
 
 bot.run(TOKEN)

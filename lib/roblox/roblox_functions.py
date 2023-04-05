@@ -1,4 +1,4 @@
-import robloxpy, requests, os
+import robloxpy, requests, os, discord
 from lib.sql.queries import DB
 
 GROUP_ID = os.getenv('GROUP_ID')
@@ -65,8 +65,9 @@ def get_roblox_ids(usernames):
     return [dict(t) for t in {tuple(d.items()) for d in results}]
 
 
-def check_for_promotions(users):
+def check_for_promotions(ctx:discord.ApplicationContext ,users):
     promoted = []
+    skipped_ranks = []
     for user in users:
         # get the current rank of user on the database
         rank = int(db.get_user_rank(user)['Rank_ID'])
@@ -79,7 +80,12 @@ def check_for_promotions(users):
             # in the case a conscript was manually promoted to diplomat not checking might demote them to solider
             role = get_role_in_group(user,GROUP_ID)
             if role['rank'] >= 10:
+                db.update_rank(user, role['rank'])
                 continue
+
+            # if they are conscript and being promoted multiple ranks they probably left so prompt reset stats
+            if role['rank'] == 1 and deserved_rank > 2:
+                skipped_ranks.append(user)
 
             print(f"Promote user {user} to {deserved_rank}")
             response = robloxpy.User.Groups.Internal.ChangeRank(GROUP_ID,user,rank)
@@ -88,10 +94,7 @@ def check_for_promotions(users):
                 promoted.append(user)
         else:
             print(f"{user} is the correct rank.")
-    return promoted
-
-
-
+    return (promoted, skipped_ranks)
 
 def get_role_in_group(user_id, group_id):
     url = f"https://groups.roblox.com/v2/users/{user_id}/groups/roles"

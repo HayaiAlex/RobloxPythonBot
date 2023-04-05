@@ -1,7 +1,7 @@
-import datetime, os, robloxpy, discord, json, requests
+import os, discord, json
 from discord.ext import commands
-from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions, get_role_in_group
-from lib.discord_functions import update_roles
+from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions
+from lib.discord_functions import update_roles, send_reset_stats_msg
 from lib.sql.queries import DB
 
 with open('config.json', 'r') as file:
@@ -16,7 +16,7 @@ class Progression(commands.Cog):
         self.bot = bot
 
     @discord.slash_command(name="award", description = "award an event to a group of users")
-    async def award(self, ctx, event: discord.Option(str, choices=events), users: discord.Option(str, name="players")):
+    async def award(self, ctx: discord.ApplicationContext, event: discord.Option(str, choices=events, description='Type of event hosted'), users: discord.Option(str, name="players", description='Those who attended the event')):
         users = [user for user in get_roblox_ids(users)]
        
         try:
@@ -34,83 +34,62 @@ class Progression(commands.Cog):
             else:
                 await ctx.respond(f"{award_msg}")
           
-            promoted = check_for_promotions([user.get('id') for user in awarded])
-            
+            promoted, skipped_ranks = check_for_promotions(ctx, [user.get('id') for user in awarded])
+
+            for user in skipped_ranks:
+                send_reset_stats_msg(ctx.guild, user, event)
+
             for user in promoted:
                 update_roles(ctx, user)
         else:
             await ctx.respond(f'No events awarded. Please check your player list.')
 
-
-    @discord.slash_command(name="profile", description = "shows a user's career profile")
-    async def profile(self, ctx, user: discord.Option(str,required=False)):
+    @discord.slash_command(name="profile", description = "shows a player's career profile")
+    async def profile(self, ctx: discord.ApplicationContext, user: discord.Option(str,required=False, description='View your own or another player\'s profile')):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
-        try:
-            user_data = db.get_data_from_id(user.get('id'))
-            requirements = db.get_rank_requirements(int(db.get_user_rank(user['id'])['Rank_ID']) + 1)
-        except:
-            user_data = {'User_ID': user, 'Rank_ID': 0, 'Raids': 0, 'Defenses': 0, 'Defense Trainings': 0, 'Prism Trainings': 0}
-            requirements = db.get_rank_requirements(1)
-         
-        roles = get_role_in_group(user['id'], GROUP_ID)
-
-        embed = discord.Embed(
-            title=f"{user.get('username')}",
-            url=f"https://www.roblox.com/users/{user['id']}/profile",
-            color=discord.Colour.from_rgb(255,255,255),
-        )
-
-        # Set description
-        description = f"""
-            Rank: **{roles['name']}**
-            """
         
-        if 0 < user_data['Rank_ID'] < config['locked_ranks']:
-            can_rank_up = True
-        else:
-            can_rank_up = False
-
-        if can_rank_up:
-            next_rank = db.get_rank(user_data['Rank_ID']+1)
-            
-            description += f"Next Rank: {next_rank['Rank_Name']}"
-
-        if user_data['Rank_ID'] == 0:
-            description += "Join the group to track your events and advance your Frostarian career."
-        else:
-            event_fields = ""
-            for event in ['Raids','Defenses','Defense Trainings','Prism Trainings']:
-                promotion_requirements = ""
-                if can_rank_up:
-                    promotion_requirements += f"**({requirements[event]})**"
-                event_fields += f"**{event}:** {user_data[event]} {promotion_requirements}\n"
-
-            event_field_name = "Events **(For Promotion)**" if can_rank_up else "Events"
-            embed.add_field(name=event_field_name, value=event_fields)
-
-        embed.description = description
-        avatar_image = robloxpy.User.External.GetBust(user['id'])
-        embed.set_footer(text="Make your career great today!")
-        embed.set_author(name="Ventis Group Datacenter", icon_url="https://i.imgur.com/YT9EJty.png")
-        embed.set_thumbnail(url=avatar_image)
-        embed.timestamp = datetime.datetime.now()
-    
+        embed = self.get_profile_embed(user)
         await ctx.respond("", embed=embed)
 
     @discord.slash_command(name="update", description = "updates a user's roles")
-    async def update_roles(self, ctx, user: discord.Option(str,required=False)):
+    async def update_roles(self, ctx: discord.ApplicationContext, user: discord.Option(str,required=False)):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
-
+        
         # update their rank
-        check_for_promotions([user.get('id')])
+        check_for_promotions(ctx, [user.get('id')])
         # update their roles
         update_roles(ctx, user)
 
         await ctx.respond(f"Updated {user.get('username')}'s roles.")
+
+    @discord.slash_command(name="setevent", description="manually set a player's events stats")
+    async def set_events(self, ctx: discord.ApplicationContext, user: discord.Option(str, name="player", description="The person you would like to change event stats of"), event: discord.Option(str, choices=events, name="event", description="Type of event to set"), num: discord.Option(int, name="value", description="The new value for the event stat")):
+        if user == None:
+            user = ctx.user.mention
+        user = get_roblox_ids(user)[0]
+
+        db.set_event(user.get('id'),event,num)
+
+        await ctx.respond(f"Set {user.get('username')}'s {event} score to {num}.")
+
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member:discord.Member):
+        # check if a member has pre-existing event scores and reset them
+        guild = member.guild
+        user = get_roblox_ids(member.mention)[0]
+        try:
+            profile = db.get_data_from_id(user.get('id'))
+            has_events = [True for event in ['Raids','Defenses','Defense Trainings','Prism Trainings'] if profile[event] > 0]
+            if not has_events:
+                return
+        except:
+            return
+        send_reset_stats_msg(guild, user)
 
 def setup(bot):
     bot.add_cog(Progression(bot))
