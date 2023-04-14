@@ -1,0 +1,415 @@
+[
+    {
+        "_id": "6021c116f5d661ee5562ddd0",
+        "Id": 1,
+        "Description": "War commendation given to medal recipients for the LSE war",
+        "Name": "Frostarian War Commendation - LSE War",
+        "Emote": "🎖️",
+        "created": 1612824854932
+    },
+    {
+        "_id": "60665b82354562a1411c1984",
+        "Id": 2,
+        "Description": "Found all the eggs during the Frostarian 2021 Egg Hunt at Grand Celeste",
+        "Name": "2021 Frostarian Easter Egg Hunt",
+        "Emote": "🥚",
+        "Role": null,
+        "created": 1617320834150
+    },
+    {
+        "_id": "60c2b537389a9a35d5fa89e5",
+        "Id": 3,
+        "Description": "Hosted the most raid wins on Aurora's Dam during the Snow Core war",
+        "Name": "Voice of the Vanguard - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373111708
+    },
+    {
+        "_id": "60c2b543389a9a35d5fa89e6",
+        "Id": 4,
+        "Description": "Hosted the most defense wins at Celeste 2 during the Snow Core wwar",
+        "Name": "Bulwark of Celeste - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373123713
+    },
+    {
+        "_id": "60c2b54f389a9a35d5fa89e7",
+        "Id": 5,
+        "Description": "Attended the most Aurora's Dam raids during the Snow Core war",
+        "Name": "Invader Inquisitor - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373135931
+    },
+    {
+        "_id": "60c2b55c389a9a35d5fa89e9",
+        "Id": 6,
+        "Description": "Attended the most Celeste 2 defenses during the Snow Core war",
+        "Name": "Celeste Protector - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373148410
+    },
+    {
+        "_id": "60c2b564389a9a35d5fa89ea",
+        "Id": 7,
+        "Description": "Attended the most events overall throughout the Snow Core war",
+        "Name": "Frequent Flyer - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373156626
+    },
+    {
+        "_id": "60c2b56c389a9a35d5fa89ed",
+        "Id": 8,
+        "Description": "Accumulated the most overall heals throughout the Snow Core war",
+        "Name": "Soldier's Savior - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373164459
+    },
+    {
+        "_id": "60c2b574389a9a35d5fa89ee",
+        "Id": 9,
+        "Description": "Accumulated the most overall damage throughout the Snow Core war",
+        "Name": "Into the Breach - Snow Core War",
+        "Emote": "❄️",
+        "Role": null,
+        "created": 1623373172758
+    },
+    {
+        "_id": "60c2bd22389a9a35d5fa8a8b",
+        "Id": 10,
+        "Description": "Participated in the May 2021 Frostarian Video Montage Competition",
+        "Name": "May 2021 Frostarian Video Montage",
+        "Emote": "📹",
+        "Role": null,
+        "created": 1623375138292
+    },
+    {
+        "_id": "60e79b4c9b40d4d7a5db820e",
+        "Id": 11,
+        "Description": "N/A",
+        "Name": "Best Hoster 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791308486
+    },
+    {
+        "_id": "60e79c799b40d4d7a5db8215",
+        "Id": 12,
+        "Description": "N/A",
+        "Name": "Best Aimer 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791609612
+    },
+    {
+        "_id": "60e79c869b40d4d7a5db8216",
+        "Id": 13,
+        "Description": "N/A",
+        "Name": "Best Defender 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791622179
+    },
+    {
+        "_id": "60e79c939b40d4d7a5db8217",
+        "Id": 14,
+        "Description": "N/A",
+        "Name": "Most likely to throw a defense 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791635587
+    },
+    {
+        "_id": "60e79c9e9b40d4d7a5db8218",
+        "Id": 15,
+        "Description": "N/A",
+        "Name": "Cult Leader 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791646380
+    },
+    {
+        "_id": "60e79ca69b40d4d7a5db821a",
+        "Id": 16,
+        "Description": "N/A",
+        "Name": "Funniest Frostarian 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791654863
+    },
+    {
+        "_id": "60e79cb09b40d4d7a5db821b",
+        "Id": 17,
+        "Description": "N/A",
+        "Name": "Frostarian Legend 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791664369
+    },
+    {
+        "_id": "60e79cb99b40d4d7a5db821c",
+        "Id": 18,
+        "Description": "N/A",
+        "Name": "Most Active 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791673547
+    },
+    {
+        "_id": "60e79cc99b40d4d7a5db821d",
+        "Id": 19,
+        "Description": "N/A",
+        "Name": "Most Productive Officer 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791689651
+    },
+    {
+        "_id": "60e79cde9b40d4d7a5db821e",
+        "Id": 20,
+        "Description": "N/A",
+        "Name": "Most Epik 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791710602
+    },
+    {
+        "_id": "60e79cf39b40d4d7a5db821f",
+        "Id": 21,
+        "Description": "N/A",
+        "Name": "Most likely to rage quit 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791731352
+    },
+    {
+        "_id": "60e79cfc9b40d4d7a5db8220",
+        "Id": 22,
+        "Description": "N/A",
+        "Name": "Most likely to get moderated 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791740899
+    },
+    {
+        "_id": "60e79d089b40d4d7a5db8221",
+        "Id": 23,
+        "Description": "N/A",
+        "Name": "Loudest on the Mic 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791752796
+    },
+    {
+        "_id": "60e79d129b40d4d7a5db8222",
+        "Id": 24,
+        "Description": "N/A",
+        "Name": "Worst Aimer 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791762036
+    },
+    {
+        "_id": "60e79d1b9b40d4d7a5db8223",
+        "Id": 25,
+        "Description": "N/A",
+        "Name": "The Stinkiest Poop Man 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791771860
+    },
+    {
+        "_id": "60e79d229b40d4d7a5db8224",
+        "Id": 26,
+        "Description": "N/A",
+        "Name": "Most Toxic 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791778636
+    },
+    {
+        "_id": "60e79d2c9b40d4d7a5db8227",
+        "Id": 27,
+        "Description": "N/A",
+        "Name": "Most likely to be demoted 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791788528
+    },
+    {
+        "_id": "60e79d349b40d4d7a5db822a",
+        "Id": 28,
+        "Description": "N/A",
+        "Name": "Best Dresser 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791796439
+    },
+    {
+        "_id": "60e79d3a9b40d4d7a5db822b",
+        "Id": 29,
+        "Description": "N/A",
+        "Name": "Worst Dresser 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791802572
+    },
+    {
+        "_id": "60e79d449b40d4d7a5db822c",
+        "Id": 30,
+        "Description": "N/A",
+        "Name": "The Ultimate Femboy 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791812297
+    },
+    {
+        "_id": "60e79d569b40d4d7a5db8231",
+        "Id": 31,
+        "Description": "N/A",
+        "Name": "Biggest Weeb 2021",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1625791830587
+    },
+    {
+        "_id": "610e11f51d02077f35aa871c",
+        "Id": 32,
+        "Description": "N/A",
+        "Name": "Doomspire Tournament Winner Summer 2021",
+        "Emote": "🏆",
+        "Role": null,
+        "created": 1628312053582
+    },
+    {
+        "_id": "610f1e091d02077f35aa9ed0",
+        "Id": 33,
+        "Description": "N/A",
+        "Name": "Developer Award",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1628380681458
+    },
+    {
+        "_id": "610f1e141d02077f35aa9ed5",
+        "Id": 34,
+        "Description": "N/A",
+        "Name": "Top Moderator",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1628380692399
+    },
+    {
+        "_id": "610f1e241d02077f35aa9eda",
+        "Id": 35,
+        "Description": "N/A",
+        "Name": "Frostarian Times Pulitzer",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1628380708267
+    },
+    {
+        "_id": "610f1ebe1d02077f35aa9ef4",
+        "Id": 36,
+        "Description": "Nominated for the most amount of awards but didn't win anything during the Frostarian Choice Awards hosted 8/7/2021",
+        "Name": "Most Nominations",
+        "Emote": "🎖️",
+        "Role": null,
+        "created": 1628380862967
+    },
+    {
+        "_id": "630a4b468c97265802f6248f",
+        "Id": 37,
+        "Description": "Hosted the most raid wins on WARCOM during the WARCOM war",
+        "Name": "Voice of the Vanguard - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619014021
+    },
+    {
+        "_id": "630a4b548c97265802f624a0",
+        "Id": 38,
+        "Description": "Hosted the most defense wins during the WARCOM war",
+        "Name": "Bulwark of Frostaria - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619028367
+    },
+    {
+        "_id": "630a4b6c8c97265802f624d3",
+        "Id": 39,
+        "Description": "Attended the most raids during the WARCOM war",
+        "Name": "Invader Inquisitor - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619052263
+    },
+    {
+        "_id": "630a4b8b8c97265802f624ee",
+        "Id": 40,
+        "Description": "Attended the most defenses during the WARCOM war",
+        "Name": "Frostaria Protector - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619083083
+    },
+    {
+        "_id": "630a4b9b8c97265802f62505",
+        "Id": 41,
+        "Description": "Attended the most events overall throughout the WARCOM warr",
+        "Name": "Frequent Flyer - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619099530
+    },
+    {
+        "_id": "630a4ba58c97265802f62506",
+        "Id": 42,
+        "Description": "Accumulated the most overall heals throughout the WARCOM warr",
+        "Name": "Soldier's Savior - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619109785
+    },
+    {
+        "_id": "630a4bb58c97265802f62518",
+        "Id": 43,
+        "Description": "Accumulated the most overall damage throughout the WARCOM war",
+        "Name": "Into the Breach - WARCOM War",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619125143
+    },
+    {
+        "_id": "630a4e988c97265802f62962",
+        "Id": 44,
+        "Description": "Given to those who helped lead defenses and raids during the WARCOM war",
+        "Name": "Frostarian Leadership",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619864146
+    },
+    {
+        "_id": "630a4ed48c97265802f629a9",
+        "Id": 45,
+        "Description": "Attended at least 3 events during the WARCOM war",
+        "Name": "Frostarian War Hero",
+        "Emote": "<:WARCOM:914332814672035891>",
+        "Role": null,
+        "created": 1661619924876
+    },
+    {
+        "_id": "63b0b3130e909ec6e824a668",
+        "Id": 46,
+        "Description": "N/A",
+        "Name": "Frostarian 2022 Winter Present Hunt Top 10",
+        "Emote": "🎖️",
+        "Role": "1058866590621384824",
+        "created": 1672524563061
+    }
+]

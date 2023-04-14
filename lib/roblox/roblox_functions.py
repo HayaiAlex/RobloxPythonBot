@@ -65,12 +65,15 @@ def get_roblox_ids(usernames):
     return [dict(t) for t in {tuple(d.items()) for d in results}]
 
 
-def check_for_promotions(ctx:discord.ApplicationContext ,users):
+def check_for_promotions(users):
     promoted = []
     skipped_ranks = []
     for user in users:
         # get the current rank of user on the database
-        rank = int(db.get_user_rank(user)['Rank_ID'])
+        try:
+            rank = int(db.get_user_rank(user)['Rank_ID'])
+        except:
+            rank = 0
         
         deserved_rank = db.get_highest_possible_rank(user)
 
@@ -98,10 +101,10 @@ def check_for_promotions(ctx:discord.ApplicationContext ,users):
 
 def get_role_in_group(user_id, group_id):
     url = f"https://groups.roblox.com/v2/users/{user_id}/groups/roles"
-    request = requests.get(url)
-    response = request.json()['data']
-    role = [datum['role'] for datum in response if datum['group']['id'] == int(group_id)]
     try:
+        request = requests.get(url)
+        response = request.json()['data']
+        role = [datum['role'] for datum in response if datum['group']['id'] == int(group_id)]
         return role[0]
     except:
         return {'name':'[0] Visitor','rank':0}

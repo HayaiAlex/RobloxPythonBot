@@ -2,18 +2,28 @@ from aiohttp import web
 from discord.ext import commands, tasks
 import discord
 import os
+import json
 import aiohttp
+from lib.discord_functions import DiscordManager
+from lib.roblox.roblox_functions import check_for_promotions, get_roblox_ids
+from lib.sql.queries import DB
+
+db = DB()
+discordManager = None
 
 app = web.Application()
 routes = web.RouteTableDef()
 
 
 def setup(bot):
+    global discordManager
+    discordManager = DiscordManager(bot)
     bot.add_cog(Webserver(bot))
 
 
 class Webserver(commands.Cog):
     def __init__(self, bot):
+        print("Setting up web server")
         self.bot = bot
         self.web_server.start()
 
@@ -22,23 +32,66 @@ class Webserver(commands.Cog):
             print("hit")
             return web.Response(text="Hello, world")
 
-        @routes.post('/dbl')
-        async def dblwebhook(request):
-            if request.headers.get('authorization') == '3mErTJMYFt':
-                data = await request.json()
-                user = self.bot.get_user(data['user']) or await self.bot.fetch_user(data['user'])
-                if user is None:
-                    return
-                _type = f'Tested!' if data['type'] == 'test' else f'Voted!'
-                upvoted_bot = f'<@{data["bot"]}>'
-                embed = discord.Embed(title=_type, colour=discord.Color.blurple())
-                embed.description = f'**Upvoter :** {user.mention} Just {_type}' + f'\n**Upvoted Bot :** {upvoted_bot}'
-                embed.set_thumbnail(url=user.avatar_url)
-                channel = self.bot.get_channel(5645646545142312312)
-                await channel.send(embed=embed)
-            return 200
+        @routes.get('/user')
+        async def get_user(request):
+            try:
+                print(f"get user {request.query['id']}")
+            
+                profile = db.get_data_from_id(request.query['id'])
+                medals = db.get_user_medals(request.query['id'])
+                profile['medals'] = medals
+                data = json.dumps(profile)
 
-        self.webserver_port = os.environ.get('PORT', 5000)
+                return web.Response(status=200,content_type="application/json", body=data)
+            except:
+                return web.Response(status=401)
+
+        @routes.post('/award')
+        async def award(request):
+            if request.headers.get('authorization') == 'some_code':
+                data = await request.json()
+                users = data['user']
+                event = data['event']
+                print("award hit")
+
+                users = [user for user in get_roblox_ids(users)]
+            
+                try:
+                    awarded = db.award(event,users)
+                    could_not_find = [user.get('username') for user in users if user.get('username').lower() not in [user.get('username').lower() for user in awarded]]
+                except:
+                    awarded = []
+                    could_not_find = []
+
+                data = {
+                    "awarded":awarded,
+                    "could_not_find":could_not_find
+                }
+
+                if len(awarded) > 0:
+
+                
+                    promoted, skipped_ranks = check_for_promotions([user.get('id') for user in awarded])
+
+                    data['promoted'] = promoted
+                    data['skipped_rank'] = skipped_ranks
+
+                    for user in skipped_ranks:
+                        await DiscordManager.send_restore_stats_msg(user, event)
+
+                    for user in promoted:
+                        discordManager.update_roles(user)
+                        
+                    data = json.dumps(data) 
+                    return web.Response(status=200,content_type="application/json", body=data)
+                else:
+                    data = json.dumps(data)
+                    return web.Response(status=200,content_type="application/json", body=data)
+
+            return web.Response(text=f"Not authorised")
+
+
+        self.webserver_port = os.environ.get('PORT', 80)
         app.add_routes(routes)
 
     @tasks.loop()

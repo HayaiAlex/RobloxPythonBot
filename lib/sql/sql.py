@@ -1,4 +1,4 @@
-import mysql.connector
+import mysql.connector, os
 from mysql.connector import Error
 import pandas as pd
 
@@ -12,7 +12,7 @@ def create_server_connection(host_name, user_name, user_password):
         )
         print("MySQL Database connection successful")
     except Error as err:
-        print(f"Error: '{err}'")
+        raise Exception(err)
 
     return connection
 
@@ -22,7 +22,7 @@ def create_database(connection, query):
         cursor.execute(query)
         print("Database created successfully")
     except Error as err:
-        print(f"Error: '{err}'")
+        raise Exception(err)
 
 def create_db_connection(host_name, user_name, user_password, db_name):
     connection = None
@@ -31,11 +31,13 @@ def create_db_connection(host_name, user_name, user_password, db_name):
             host=host_name,
             user=user_name,
             passwd=user_password,
-            database=db_name
+            database=db_name,
+            charset='utf8mb4'
         )
+        connection.set_charset_collation('utf8mb4')
         print("MySQL Database connection successful")
     except Error as err:
-        print(f"Error: '{err}'")
+        raise Exception(err)
 
     return connection
 
@@ -49,7 +51,8 @@ def execute_query(connection, query):
         else:
             return 'No rows affected'
     except Error as err:
-        return f"Error: '{err}'"
+        print(f'error with {err}')
+        raise Exception(err)
 
 def read_query(connection, query):
     cursor = connection.cursor()
@@ -59,15 +62,18 @@ def read_query(connection, query):
         result = cursor.fetchall()
         return result
     except Error as err:
-        return f"Error: '{err}'"
+        raise Exception(err)
+    
 
 # file = open('lib/sql/database.sql', 'r')
 # init_db = file.read()
 # file.close()
 # init_queries = init_db.split(';')
 
-# server_connection = create_server_connection('localhost','root','')
-# create_database(server_connection,'CREATE DATABASE guf_test')
-# db = create_db_connection('localhost','root','','guf_test')
+# PASSWORD = os.getenv('SQL_PASSWORD')
+
+# server_connection = create_server_connection('localhost','root',PASSWORD)
+# create_database(server_connection,'CREATE DATABASE guf')
+# db = create_db_connection('localhost','root',PASSWORD,'guf')
 # for query in init_queries:
 #     print(execute_query(db, query))

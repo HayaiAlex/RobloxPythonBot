@@ -1,18 +1,24 @@
 import os, discord, json
 from discord.ext import commands
 from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions
-from lib.discord_functions import update_roles, send_reset_stats_msg
+from lib.discord_functions import DiscordManager
 from lib.sql.queries import DB
 
 with open('config.json', 'r') as file:
     config = json.load(file)
     
+events = ['Raid', 'Defense','Defense Training','Prism Training']
 GROUP_ID = os.getenv('GROUP_ID')
 db = DB()
+discordManager = None
 
-events = ['Raid', 'Defense','Defense Training','Prism Training']
+def setup(bot):
+    global discordManager
+    discordManager = DiscordManager(bot)
+    bot.add_cog(Progression(bot))
+
 class Progression(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot:discord.Bot):
         self.bot = bot
 
     @discord.slash_command(name="award", description = "award an event to a group of users")
@@ -23,6 +29,7 @@ class Progression(commands.Cog):
             awarded = db.award(event,users)
             could_not_find = [user.get('username') for user in users if user.get('username').lower() not in [user.get('username').lower() for user in awarded]]
         except:
+            print('something happened')
             awarded = []
 
         if len(awarded) > 0:
@@ -34,13 +41,13 @@ class Progression(commands.Cog):
             else:
                 await ctx.respond(f"{award_msg}")
           
-            promoted, skipped_ranks = check_for_promotions(ctx, [user.get('id') for user in awarded])
+            promoted, skipped_ranks = check_for_promotions([user.get('id') for user in awarded])
 
             for user in skipped_ranks:
-                send_reset_stats_msg(ctx.guild, user, event)
+                await discordManager.send_restore_stats_msg(user, event)
 
             for user in promoted:
-                update_roles(ctx, user)
+                discordManager.update_roles(user)
         else:
             await ctx.respond(f'No events awarded. Please check your player list.')
 
@@ -50,7 +57,7 @@ class Progression(commands.Cog):
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
         
-        embed = self.get_profile_embed(user)
+        embed = discordManager.get_profile_embed(user)
         await ctx.respond("", embed=embed)
 
     @discord.slash_command(name="update", description = "updates a user's roles")
@@ -60,9 +67,9 @@ class Progression(commands.Cog):
         user = get_roblox_ids(user)[0]
         
         # update their rank
-        check_for_promotions(ctx, [user.get('id')])
+        check_for_promotions([user.get('id')])
         # update their roles
-        update_roles(ctx, user)
+        await discordManager.update_roles(user)
 
         await ctx.respond(f"Updated {user.get('username')}'s roles.")
 
@@ -80,16 +87,12 @@ class Progression(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member:discord.Member):
         # check if a member has pre-existing event scores and reset them
-        guild = member.guild
         user = get_roblox_ids(member.mention)[0]
         try:
             profile = db.get_data_from_id(user.get('id'))
-            has_events = [True for event in ['Raids','Defenses','Defense Trainings','Prism Trainings'] if profile[event] > 0]
+            has_events = [True for event in ['Raids','Defenses','Defense_Trainings','Prism_Trainings'] if profile[event] > 0]
             if not has_events:
                 return
         except:
             return
-        send_reset_stats_msg(guild, user)
-
-def setup(bot):
-    bot.add_cog(Progression(bot))
+        await discordManager.send_restore_stats_msg(user)
