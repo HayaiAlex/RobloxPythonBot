@@ -234,3 +234,22 @@ class DB():
             return medals
         except:
             raise('Could not find any medals')
+        
+    def create_medal(self, title, description, emote, role_id='NULL'):
+        try:
+            query = f"""
+            INSERT INTO medals (Name,Description,Emote,Role_ID,Created)
+            VALUES ('{title}', '{description}', '{emote}', {role_id}, CURRENT_TIMESTAMP);
+            """
+            execute_query(db, query)
+        except:
+            raise('Could not create medal')   
+        
+    def delete_medal(self, id):
+        try:
+            query = f"""
+            DELETE FROM medals WHERE Medal_ID = {id};
+            """
+            execute_query(db, query)
+        except:
+            raise('Could not delete medal')
