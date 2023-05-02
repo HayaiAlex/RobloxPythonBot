@@ -20,7 +20,6 @@ class DB():
             self.db = create_db_connection('localhost','root',SQL_PASS,'guf')
     
     def award(self, event, users):
-        self.check_connection()
         print(users)
         users = [user for user in users if user.get('id') != None]
         if not users:
@@ -80,8 +79,6 @@ class DB():
         return awarded
     
     def update_rank(self, id, rank):
-        self.check_connection()
-
         query = f"""
         UPDATE users SET Rank_ID = {rank} WHERE User_ID = {id}
         """
@@ -92,8 +89,6 @@ class DB():
             return f'Error updating rank {result}'
 
     def get_user_rank(self, id):
-        self.check_connection()
-
         query = f"""
         SELECT users.Rank_ID, rank_requirements.Rank_Name, rank_requirements.Role_ID FROM users JOIN rank_requirements ON users.Rank_ID = rank_requirements.Rank_ID WHERE User_ID = {id};
         """
@@ -105,8 +100,6 @@ class DB():
             return f'Error checking users {results}'
 
     def get_rank(self, id):
-        self.check_connection()
-
         query = f"""
         SELECT * FROM rank_requirements WHERE Rank_ID = {id}
         """
@@ -118,8 +111,6 @@ class DB():
             return f'Error getting rank {results}'
 
     def get_highest_possible_rank(self, id):
-        self.check_connection()
-
         query = f"""
         SELECT MAX(rank_requirements.Rank_ID)
         FROM rank_requirements
@@ -137,8 +128,6 @@ class DB():
             return f'Error checking users {results}'
         
     def get_data_from_id(self, id):
-        self.check_connection()
-
         query = f"""
         SELECT * FROM users WHERE User_ID = {id}
         """
@@ -150,8 +139,6 @@ class DB():
             raise Exception('Error finding userdata')
         
     def get_rank_requirements(self, rank):
-        self.check_connection()
-
         query = f"""
         SELECT Raids, Defenses, Defense_Trainings, Prism_Trainings FROM rank_requirements WHERE Rank_ID = {rank}
         """
@@ -163,8 +150,6 @@ class DB():
             raise Exception(f'Error finding rank requirement {results}')
         
     def get_all_ranks(self):
-        self.check_connection()
-
         query = f"""
         SELECT * FROM rank_requirements
         """
@@ -176,8 +161,6 @@ class DB():
             return f'Error getting all ranks {results}'
         
     def set_event(self,id,event,num):
-        self.check_connection()
-
         query = f"""
         UPDATE users SET {event} = {num} WHERE User_ID = {id}  
         """
@@ -188,8 +171,6 @@ class DB():
             return f'Error setting rank {result}'
         
     def reset_events(self,id):
-        self.check_connection()
-
         try:
             query = f"""
             UPDATE users SET Raids = 0, Defenses = 0, Defense_Trainings = 0, Prism_Trainings = 0 WHERE User_ID = {id}  
@@ -204,14 +185,52 @@ class DB():
             pass
 
     def get_user_medals(self,id:int):
-        self.check_connection()
-
         try:
             query = f"""
             SELECT Emote, Name FROM medals JOIN user_medals ON medals.Medal_ID = user_medals.Medal_ID JOIN users ON users.User_ID = user_medals.User_ID WHERE users.User_ID = {id};
             """
             results = read_query(db, query)
+            print(results)
             columns = ['Emote','Name']
-            return [dict(zip(columns,rank)) for rank in results]
+            medals = [dict(zip(columns,rank)) for rank in results]
+            print(medals)
+            return medals
         except:
+            print("Error getting user's medals")
             return []
+
+    def get_medal_info(self,id:int):
+        try:
+            medal_query = f"""
+            SELECT Name, Emote, Description, Role_ID, Created FROM medals WHERE medals.Medal_ID = {id};
+            """
+            medal_data = read_query(db, medal_query)[0]
+            
+            users_query = f"""
+            SELECT users.User_ID FROM medals JOIN user_medals ON medals.Medal_ID = user_medals.Medal_ID JOIN users ON users.User_ID = user_medals.User_ID WHERE medals.Medal_ID = {id};
+            """
+            users = read_query(db, users_query)
+            users = [user[0] for user in users]
+            
+            columns = ["Name", "Emote", "Description", "Role ID", "Created"]
+            medal_data = dict(zip(columns,medal_data))
+
+            medal_data['Users'] = users
+            
+            return medal_data
+        except:
+            raise('Could not find medal')
+        
+    def get_all_medals(self):
+        try:
+            medal_query = f"""
+            SELECT Medal_ID, Name, Emote, Description, Role_ID, Created FROM medals;
+            """
+            medals = read_query(db, medal_query)
+            
+            columns = ["ID", "Name", "Emote", "Description", "Role ID", "Created"]
+            medals = [dict(zip(columns,medal)) for medal in medals]
+
+            return medals
+        except:
+            raise('Could not find any medals')

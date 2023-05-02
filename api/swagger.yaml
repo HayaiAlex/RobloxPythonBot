@@ -1,0 +1,199 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: GUF Infocenter APIs
+  description: A list of all the endpoints that you may access the guf infocenter from.
+tags:
+  - name: Player
+  - name: Medal
+  - name: Miscellaneous
+paths:
+  /:
+    get:
+      tags:
+        - Miscellaneous
+      summary: Tests the api server is running
+      produces:
+        - text/plain
+      responses:
+        200:
+          description: OK
+          schema:
+            type: string
+            example: 'Hello, world'
+  
+  /user:
+    get:
+      tags:
+        - Player
+      summary: Get a player's profile
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: query
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              User_ID:
+                type: integer
+                format: int64
+              Rank_ID:
+                type: integer
+                format: int64
+              Raids:
+                type: integer
+                format: int64
+              Defenses:
+                type: integer
+                format: int64
+              Defense_Trainings:
+                type: integer
+                format: int64
+              Prism_Trainings:
+                type: integer
+                format: int64
+              medals:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Emote:
+                      type: string
+                    Name:
+                      type: string
+        404:
+          description: Player not found
+  
+  /medal:
+    get:
+      tags:
+        - Medal
+      summary: Get a medal's information
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: query
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              Name:
+                type: string
+              Emote:
+                type: string
+              Description:
+                type: string
+              Role ID:
+                type: integer
+                format: int64
+              Created:
+                type: string
+              Users:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+        404:
+          description: Medal not found
+ 
+  /allmedals:
+    get:
+      tags:
+        - Medal
+      summary: Get a list of all medals
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              Medal:
+                type: object
+                properties:
+                  Name:
+                    type: string
+                  Emote:
+                    type: string
+                  Description:
+                    type: string
+                  Role ID:
+                    type: integer
+                    format: int64
+                  Created:
+                    type: string
+                 
+        404:
+          description: No medals found
+
+
+  /award:
+    post:
+      tags:
+        - Player
+      summary: Awards an event to a list of players
+      produces:
+        - application/json
+      parameters:
+        - name: request
+          in: body
+          required: true
+          description: Valid events - Raid, Defense, Defense_Training, Prism_Training
+          schema:
+            type: object
+            properties:
+              user:
+                type: string
+                example: 'player1 player2'
+              event:
+                type: string
+                example: 'Raid'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              awarded:
+                type: array
+                items:
+                  type: string
+                  example:
+                    'player1'
+              could_not_find:
+                type: array
+                items:
+                  type: string
+                  example:
+                    'player2'
+              promoted:
+                type: array
+                items:
+                  type: string
+                  example:
+                    'player1'
+              skipped_rank:
+                type: array
+                items:
+                  type: string
+                  example:
+                    'player1'
+        401:
+          description: Not authorized
+            
+    
+

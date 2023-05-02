@@ -1,4 +1,5 @@
 from aiohttp import web
+from aiohttp_swagger import *
 from discord.ext import commands, tasks
 import discord
 import os
@@ -26,13 +27,14 @@ class Webserver(commands.Cog):
         print("Setting up web server")
         self.bot = bot
         self.web_server.start()
+        print("Web server live")
 
         @routes.get('/')
         async def welcome(request):
-            print("hit")
+            print("Hit")
             return web.Response(text="Hello, world")
-
-        @routes.get('/user')
+        
+        @routes.get('/user', allow_head=False)
         async def get_user(request):
             try:
                 print(f"get user {request.query['id']}")
@@ -44,7 +46,31 @@ class Webserver(commands.Cog):
 
                 return web.Response(status=200,content_type="application/json", body=data)
             except:
-                return web.Response(status=401)
+                return web.Response(status=404)
+            
+        @routes.get('/medal', allow_head=False)
+        async def get_medal(request):
+            try:
+                print(f"getting medal {request.query['id']}")
+
+                medal_data = db.get_medal_info(request.query['id'])
+                data = json.dumps(medal_data, default=str)
+
+                return web.Response(status=200,content_type="application/json", body=data)
+            except:
+                return web.Response(status=404)
+            
+        @routes.get('/allmedals', allow_head=False)
+        async def get_all_medals(request):
+            try:
+                print(f"getting all medals")
+
+                medals = db.get_all_medals()
+                data = json.dumps(medals, default=str)
+
+                return web.Response(status=200,content_type="application/json", body=data)
+            except:
+                return web.Response(status=404)
 
         @routes.post('/award')
         async def award(request):
@@ -88,7 +114,7 @@ class Webserver(commands.Cog):
                     data = json.dumps(data)
                     return web.Response(status=200,content_type="application/json", body=data)
 
-            return web.Response(text=f"Not authorised")
+            return web.Response(status=401)
 
 
         self.webserver_port = os.environ.get('PORT', 80)
@@ -104,3 +130,4 @@ class Webserver(commands.Cog):
     @web_server.before_loop
     async def web_server_before_loop(self):
         await self.bot.wait_until_ready()
+        setup_swagger(app, swagger_url="/api/v1/doc", ui_version=3, swagger_from_file="api/swagger.yaml")
