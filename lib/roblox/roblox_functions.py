@@ -71,21 +71,23 @@ def check_for_promotions(users):
     for user in users:
         # get the current rank of user on the database
         try:
-            rank = int(db.get_user_rank(user)['Rank_ID'])
+            rank = db.get_user_rank(user)
         except:
+            print("Couldnt find rank info, rank:0")
             rank = 0
         
         deserved_rank = db.get_highest_possible_rank(user)
+        print(f"rank: {rank}, deserved rank: {deserved_rank}")
 
-        if rank != deserved_rank:
-            # if they are a diplomat or above don't change rank
-            # double check their rank on the roblox api before promoting them 
-            # in the case a conscript was manually promoted to diplomat not checking might demote them to solider
-            role = get_role_in_group(user,GROUP_ID)
-            if role['rank'] >= 10:
+        # always check if they are the correct rank in the group
+        role = get_role_in_group(user,GROUP_ID)
+        print(f"Actual role in group is: {role['rank']}")
+        if role['rank'] >= 10:
+            if rank != role['rank']:
                 db.update_rank(user, role['rank'])
-                continue
-
+            continue
+        
+        if role['rank'] != deserved_rank:
             # if they are conscript and being promoted multiple ranks they probably left so prompt reset stats
             if role['rank'] == 1 and deserved_rank > 2:
                 skipped_ranks.append(user)

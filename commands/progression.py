@@ -22,9 +22,11 @@ class Progression(commands.Cog):
         self.bot = bot
 
     @discord.slash_command(name="award", description = "award an event to a group of users")
-    async def award(self, ctx: discord.ApplicationContext, event: discord.Option(str, choices=events, description='Type of event hosted'), users: discord.Option(str, name="players", description='Those who attended the event')):
+    async def award(self, ctx: discord.ApplicationContext, 
+                    event: discord.Option(str, choices=events, description='Type of event hosted'), 
+                    users: discord.Option(str, name="players", description='Those who attended the event')):
         users = [user for user in get_roblox_ids(users)]
-       
+
         try:
             awarded = db.award(event,users)
             could_not_find = [user.get('username') for user in users if user.get('username').lower() not in [user.get('username').lower() for user in awarded]]
@@ -52,7 +54,8 @@ class Progression(commands.Cog):
             await ctx.respond(f'No events awarded. Please check your player list.')
 
     @discord.slash_command(name="profile", description = "shows a player's career profile")
-    async def profile(self, ctx: discord.ApplicationContext, user: discord.Option(str,required=False, description='View your own or another player\'s profile')):
+    async def profile(self, ctx: discord.ApplicationContext, 
+                      user: discord.Option(str,required=False, description='View your own or another player\'s profile')):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
@@ -61,20 +64,27 @@ class Progression(commands.Cog):
         await ctx.respond("", embed=embed)
 
     @discord.slash_command(name="update", description = "updates a user's roles")
-    async def update_roles(self, ctx: discord.ApplicationContext, user: discord.Option(str,required=False)):
+    async def update_roles(self, ctx: discord.ApplicationContext, 
+                           user: discord.Option(str,required=False)):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
+        await ctx.respond(f"Checking {user.get('username')}...")
         
         # update their rank
         check_for_promotions([user.get('id')])
         # update their roles
         await discordManager.update_roles(user)
-
-        await ctx.respond(f"Updated {user.get('username')}'s roles.")
+        
+        # edit preious sent message
+        await ctx.interaction.edit_original_response(content=f"Updated {user.get('username')}'s roles.")
+        
 
     @discord.slash_command(name="setevent", description="manually set a player's events stats")
-    async def set_events(self, ctx: discord.ApplicationContext, user: discord.Option(str, name="player", description="The person you would like to change event stats of"), event: discord.Option(str, choices=events, name="event", description="Type of event to set"), num: discord.Option(int, name="value", description="The new value for the event stat")):
+    async def set_events(self, ctx: discord.ApplicationContext, 
+                         user: discord.Option(str, name="player", description="The person you would like to change event stats of"), 
+                         event: discord.Option(str, choices=events, name="event", description="Type of event to set"), 
+                         num: discord.Option(int, name="value", description="The new value for the event stat")):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]

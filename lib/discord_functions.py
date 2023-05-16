@@ -17,8 +17,17 @@ class DiscordManager():
     async def update_roles(self, user):
         # next, update their roles
         current_rank = db.get_user_rank(user.get('id'))
-        guild:discord.Guild = self.bot.fetch_guild(GUILD_ID)
-        new_rank_role = discord.utils.get(guild.roles, name=current_rank['Rank_Name'])
+        print(f"Current rank: {current_rank}")
+        guild:discord.Guild = await self.bot.fetch_guild(GUILD_ID)
+
+        # get the rank name using robloxpy and the rank id
+        ranks = robloxpy.Group.External.GetRoles(GROUP_ID)
+        # (['Guest','Member','2nd Rank','3rd','Admin','Owner'],[0,1,2,3,254,255])
+        rank_name = ranks[0][ranks[1].index(current_rank)]   
+        print(f"Rank name: {rank_name}")
+        
+        print(guild)
+        new_rank_role = discord.utils.get(guild.roles, name=rank_name)
 
         # user rover to get their discord id
         API = os.getenv('ROVERIFY_API')
@@ -30,8 +39,7 @@ class DiscordManager():
         discord_user = await guild.fetch_member(users_discord_id)
 
         # remove all rank roles that may or may not be incorrect
-        ranks = [rank['Rank_Name'] for rank in db.get_all_ranks()]
-        rank_roles = [role for role in await guild.fetch_roles() if role.name in ranks]
+        rank_roles = [role for role in await guild.fetch_roles() if role.name in ranks[0]]
         print(rank_roles)
         await discord_user.remove_roles(*rank_roles)
         await discord_user.add_roles(new_rank_role)

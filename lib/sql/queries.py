@@ -34,8 +34,6 @@ class DB():
             print(f"reading existing records {results}")
         except:            
             raise Exception(f'Error checking users {results}')
-
-        print(users)
         
         ids = [user[0] for user in results]
         new_ids = [user.get('id') for user in users if user.get('id') not in ids]
@@ -89,6 +87,16 @@ class DB():
             return f'Error updating rank {result}'
 
     def get_user_rank(self, id):
+        query = f"""
+        SELECT users.Rank_ID FROM users WHERE User_ID = {id};
+        """
+        results = read_query(self.db, query)
+        try:
+            return int(results[0][0])
+        except:
+            return f'Error checking users {results}'
+        
+    def get_user_rank_legacy(self, id):
         query = f"""
         SELECT users.Rank_ID, rank_requirements.Rank_Name, rank_requirements.Role_ID FROM users JOIN rank_requirements ON users.Rank_ID = rank_requirements.Rank_ID WHERE User_ID = {id};
         """

@@ -22,7 +22,11 @@ class Medals(commands.Cog):
         self.bot = bot
 
     @medal_commands.command(name="create", description = "Create a new medal")
-    async def create(self, ctx: discord.ApplicationContext, title: discord.Option(str,required=True, description='The title of the medal'), emote: discord.Option(str,required=False, description='The emoji symbol for this medal'), description: discord.Option(str,required=False, description='The medal description')):
+    async def create(self, ctx: discord.ApplicationContext, 
+                     title: discord.Option(str,required=True, description='The title of the medal'), 
+                     emote: discord.Option(str,required=False, description='The emoji symbol for this medal'), 
+                     description: discord.Option(str,required=False, description='The medal description')):
+        
         db.create_medal(title,description,emote)
         await ctx.respond(f"Created medal: {title}")
 
@@ -49,7 +53,9 @@ class Medals(commands.Cog):
             await interaction.response.edit_message(view=self, embed=self.embed)
     
     @medal_commands.command(name="delete", description = "Delete a medal from the database")
-    async def delete(self, ctx: discord.ApplicationContext, id: discord.Option(int, required=True, description='Medal ID')):
+    async def delete(self, ctx: discord.ApplicationContext, 
+                     id: discord.Option(int, required=True, description='Medal ID')):
+
         medal = db.get_medal_info(id)
 
         embed = discord.Embed(
@@ -58,20 +64,29 @@ class Medals(commands.Cog):
         )
         embed.add_field(name="Name",value=f"{medal['Emote']} {medal['Name']}")
         embed.add_field(name="Description",value=f"{medal['Description']}")
+
         await ctx.respond(embed=embed, view=self.DeleteMedalView(id, medal, embed))
     
     @medal_commands.command(name="award", description = "Award a medal to player(s)")
-    async def awardMedal(self, ctx: discord.ApplicationContext, title: discord.Option(str,required=True, description='The title of the medal'), emote: discord.Option(str,required=False, description='The emoji symbol for this medal'), description: discord.Option(str,required=False, description='The medal description')):
+    async def awardMedal(self, ctx: discord.ApplicationContext, 
+                         title: discord.Option(str,required=True, description='The title of the medal'), 
+                         emote: discord.Option(str,required=False, description='The emoji symbol for this medal'), 
+                         description: discord.Option(str,required=False, description='The medal description')):
         pass
 
     @medal_commands.command(name="unaward", description = "Unaward a medal from player(s)")
-    async def unawardMedal(self, ctx: discord.ApplicationContext, title: discord.Option(str,required=True, description='The title of the medal'), emote: discord.Option(str,required=False, description='The emoji symbol for this medal'), description: discord.Option(str,required=False, description='The medal description')):
+    async def unawardMedal(self, ctx: discord.ApplicationContext, 
+                           title: discord.Option(str,required=True, description='The title of the medal'), 
+                           emote: discord.Option(str,required=False, description='The emoji symbol for this medal'), description: discord.Option(str,required=False, description='The medal description')):
         pass
 
     @role_commands.command(name="assign", description = "Assign a role that will automatically be given to anyone who has this medal")
-    async def assignRoleToMedal(self, ctx: discord.ApplicationContext, id: discord.Option(int, required=True, description='Medal ID'), role: discord.Option(str,required=True, description='The role ID')):
+    async def assignRoleToMedal(self, ctx: discord.ApplicationContext, 
+                                id: discord.Option(int, required=True, description='Medal ID'), 
+                                role: discord.Option(str,required=True, description='The role ID')):
         pass
 
     @role_commands.command(name="remove", description = "Remove the link between a role and a medal")
-    async def removeRoleFromMedal(self, ctx: discord.ApplicationContext, id: discord.Option(int, required=True, description='Medal ID')):
+    async def removeRoleFromMedal(self, ctx: discord.ApplicationContext, 
+                                  id: discord.Option(int, required=True, description='Medal ID')):
         pass
