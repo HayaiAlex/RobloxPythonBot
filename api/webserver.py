@@ -9,6 +9,8 @@ from lib.discord_functions import DiscordManager
 from lib.roblox.roblox_functions import check_for_promotions, get_roblox_ids
 from lib.sql.queries import DB
 
+Auth = os.getenv('AUTH')
+
 db = DB()
 discordManager = None
 
@@ -41,12 +43,37 @@ class Webserver(commands.Cog):
             
                 profile = db.get_data_from_id(request.query['id'])
                 medals = db.get_user_medals(request.query['id'])
-                profile['medals'] = medals
+                profile['Medals'] = medals
                 data = json.dumps(profile)
 
                 return web.Response(status=200,content_type="application/json", body=data)
             except:
                 return web.Response(status=404)
+            
+        @routes.post('/update-user')
+        async def update_user(request):
+            data = await request.json()
+            print(data)
+            if request.headers.get('authorization') != Auth:
+                return web.Response(status=401)
+            try:
+                data = await request.json()
+                print(data)
+                id = data.pop('id')
+                print(f"update user {id}")
+                msg = ""
+                for stat,value in data.items():
+                    print(f"updating {stat} to {value}")
+                    try:
+                        db.set_user_stat(id, stat, value)
+                        msg += f"Updated {stat} to {value}\n"
+                    except Exception as e:
+                        msg += f"Error updating {stat} to {value}\n"
+                        msg += f"Error: {e}\n"
+                return web.Response(status=200, text=msg)
+            except:
+                return web.Response(status=404)
+            
             
         @routes.get('/medal', allow_head=False)
         async def get_medal(request):
@@ -60,7 +87,7 @@ class Webserver(commands.Cog):
             except:
                 return web.Response(status=404)
             
-        @routes.get('/allmedals', allow_head=False)
+        @routes.get('/all-smedals', allow_head=False)
         async def get_all_medals(request):
             try:
                 print(f"getting all medals")
@@ -74,47 +101,48 @@ class Webserver(commands.Cog):
 
         @routes.post('/award')
         async def award(request):
-            if request.headers.get('authorization') == 'some_code':
-                data = await request.json()
-                users = data['user']
-                event = data['event']
-                print("award hit")
-
-                users = [user for user in get_roblox_ids(users)]
+            if request.headers.get('authorization') != Auth:
+                return web.Response(status=401)
             
-                try:
-                    awarded = db.award(event,users)
-                    could_not_find = [user.get('username') for user in users if user.get('username').lower() not in [user.get('username').lower() for user in awarded]]
-                except:
-                    awarded = []
-                    could_not_find = []
+            data = await request.json()
+            users = data['user']
+            event = data['event']
+            print("award hit")
 
-                data = {
-                    "awarded":awarded,
-                    "could_not_find":could_not_find
-                }
+            users = [user for user in get_roblox_ids(users)]
+        
+            try:
+                awarded = db.award(event,users)
+                could_not_find = [user.get('username') for user in users if user.get('username').lower() not in [user.get('username').lower() for user in awarded]]
+            except:
+                awarded = []
+                could_not_find = []
 
-                if len(awarded) > 0:
+            data = {
+                "awarded":awarded,
+                "could_not_find":could_not_find
+            }
 
-                
-                    promoted, skipped_ranks = check_for_promotions([user.get('id') for user in awarded])
+            if len(awarded) > 0:
 
-                    data['promoted'] = promoted
-                    data['skipped_rank'] = skipped_ranks
+            
+                promoted, skipped_ranks = check_for_promotions([user.get('id') for user in awarded])
 
-                    for user in skipped_ranks:
-                        await DiscordManager.send_restore_stats_msg(user, event)
+                data['promoted'] = promoted
+                data['skipped_rank'] = skipped_ranks
 
-                    for user in promoted:
-                        discordManager.update_roles(user)
-                        
-                    data = json.dumps(data) 
-                    return web.Response(status=200,content_type="application/json", body=data)
-                else:
-                    data = json.dumps(data)
-                    return web.Response(status=200,content_type="application/json", body=data)
+                for user in skipped_ranks:
+                    await DiscordManager.send_restore_stats_msg(user, event)
 
-            return web.Response(status=401)
+                for user in promoted:
+                    discordManager.update_roles(user)
+                    
+                data = json.dumps(data) 
+                return web.Response(status=200,content_type="application/json", body=data)
+            else:
+                data = json.dumps(data)
+                return web.Response(status=200,content_type="application/json", body=data)
+
 
 
         self.webserver_port = os.environ.get('PORT', 80)

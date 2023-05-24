@@ -89,7 +89,7 @@ class Progression(commands.Cog):
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
 
-        db.set_event(user.get('id'),event,num)
+        db.set_user_stat(user.get('id'),event,num)
 
         await ctx.respond(f"Set {user.get('username')}'s {event} score to {num}.")
 

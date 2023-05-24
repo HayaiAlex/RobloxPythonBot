@@ -109,7 +109,7 @@ paths:
         404:
           description: Medal not found
  
-  /allmedals:
+  /all-medals:
     get:
       tags:
         - Medal

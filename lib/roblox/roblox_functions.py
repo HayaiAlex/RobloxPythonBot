@@ -1,6 +1,7 @@
 import robloxpy, requests, os, discord
 from lib.sql.queries import DB
-
+from dotenv import load_dotenv
+load_dotenv(override=True)
 GROUP_ID = os.getenv('GROUP_ID')
 db = DB()
 
@@ -12,7 +13,9 @@ def get_usernames_from_ids(ids):
             'excludeBannedUsers': True
         })
         response = request.json()['data']
-        return [{'username': user.get('name'), 'id': user.get('id')} for user in response]
+        usernames = [{'username': user.get('name'), 'id': user.get('id')} for user in response]
+        usernames += [{'username': id, 'id': None} for id in ids if id not in [user.get('id') for user in response]]
+        return usernames
     except:
         return [] 
 
@@ -32,16 +35,15 @@ def get_roblox_ids(usernames):
             API = os.getenv('ROVERIFY_API')
             GUILD_ID = os.getenv('DISCORD_GUILD')
             url = f"http://registry.rover.link/api/guilds/{GUILD_ID}/discord-to-roblox/{username[2:-1]}"
-            request = requests.get(url,headers={'Authorization': f"Bearer {API}"})
+            request = requests.get(url,headers={'Authorization': f'Bearer {API}'})
             response = request.json()
-
             if response.get('robloxId'):
                 results.append({'username':response.get('cachedUsername'), 'id':response.get('robloxId')})
             else:
                 results.append({'username':username, 'id':None})
     
     
-    remaining_usernames = [u for u in usernames if u not in results and not username.startswith('<@')]
+    remaining_usernames = [u for u in usernames if u not in results and not u.startswith('<@')]
     if remaining_usernames:
         try:
             url = 'https://users.roblox.com/v1/usernames/users'
@@ -61,9 +63,12 @@ def get_roblox_ids(usernames):
         except:
             pass
 
-    # lastly remove any duplicates
-    return [dict(t) for t in {tuple(d.items()) for d in results}]
+    # lastly remove duplicates
+    for user in results:
+        if results.count(user) > 1:
+            results.remove(user)
 
+    return results
 
 def check_for_promotions(users):
     promoted = []
@@ -72,11 +77,15 @@ def check_for_promotions(users):
         # get the current rank of user on the database
         try:
             rank = db.get_user_rank(user)
-        except:
-            print("Couldnt find rank info, rank:0")
+        except Exception as err:
+            print(err)
             rank = 0
         
-        deserved_rank = db.get_highest_possible_rank(user)
+        try:
+            deserved_rank = db.get_highest_possible_rank(user)
+        except Exception as err:
+            print(err)
+            deserved_rank = 0
         print(f"rank: {rank}, deserved rank: {deserved_rank}")
 
         # always check if they are the correct rank in the group
@@ -85,9 +94,10 @@ def check_for_promotions(users):
         if role['rank'] >= 10:
             if rank != role['rank']:
                 db.update_rank(user, role['rank'])
+            print(f"{user} is the correct rank.")
             continue
         
-        if role['rank'] != deserved_rank:
+        if role['rank'] != deserved_rank and role['rank'] > 0:
             # if they are conscript and being promoted multiple ranks they probably left so prompt reset stats
             if role['rank'] == 1 and deserved_rank > 2:
                 skipped_ranks.append(user)

@@ -136,7 +136,7 @@ class DiscordManager():
         @discord.ui.button(label="Restore Stats", style=discord.ButtonStyle.blurple, emoji="🪖") 
         async def button_callback(self, button, interaction):
             for event in ['Raids','Defenses','Defense_Trainings','Prism_Trainings']:
-                db.set_event(self.user.get('id'), event, self.previous_stats[event])
+                db.set_user_stat(self.user.get('id'), event, self.previous_stats[event])
             if self.event:
                 db.award(self.event, [self.user])
                 check_for_promotions([self.user])
