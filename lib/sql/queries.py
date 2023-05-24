@@ -80,34 +80,6 @@ class DB():
             return int(results[0][0])
         except:
             raise Exception(f'Could not find {id}')
-
-    def get_rank(self, id):
-        query = f"""
-        SELECT * FROM rank_requirements WHERE Rank_ID = {id}
-        """
-        results = read_query(query)
-        try:
-            columns = ['Rank_ID','Rank_Name','Role_ID','Raids','Defenses','Defense Trainings','Prism Trainings']
-            return dict(zip(columns,results[0]))
-        except:
-            return f'Error getting rank {results}'
-
-    def get_highest_possible_rank(self, id):
-        query = f"""
-        SELECT MAX(rank_requirements.Rank_ID)
-        FROM rank_requirements
-        CROSS JOIN users 
-        WHERE users.User_ID = {id}
-        AND users.Raids >= rank_requirements.Raids
-        AND users.Defenses >= rank_requirements.Defenses
-        AND users.Defense_Trainings >= rank_requirements.Defense_Trainings
-        AND users.Prism_Trainings >= rank_requirements.Prism_Trainings;
-        """
-        results = read_query(query)
-        try:
-            return int(results[0][0])
-        except:
-            raise Exception(f'Error getting highest rank.')
         
     def get_data_from_id(self, id):
         query = f"""
@@ -115,32 +87,10 @@ class DB():
         """
         try:
             results = read_query(query)
-            columns = ['User_ID','Rank_ID','Raids','Defenses','Defense_Trainings','Prism_Trainings','Spar_Gun_Wins','Spar_Gun_Kills','Spar_Sword_Wins','Spar_Sword_Kills','Solo_Aim_Trainer_Kills']
+            columns = ['User_ID','Rank_ID','Raids','Defenses','Defense_Trainings','Prism_Trainings','Spar_Gun_Wins','Spar_Gun_Kills','Spar_Sword_Wins','Spar_Sword_Kills','Solo_Aim_Trainer_Kills','Passed_Entrance_Exam','Passed_MR_Vote']
             return dict(zip(columns,results[0]))
         except:
             raise Exception('Error finding userdata')
-        
-    def get_rank_requirements(self, rank):
-        query = f"""
-        SELECT Raids, Defenses, Defense_Trainings, Prism_Trainings FROM rank_requirements WHERE Rank_ID = {rank}
-        """
-        try:
-            results = read_query(query)
-            columns = ['Raids','Defenses','Defense Trainings','Prism Trainings']
-            return dict(zip(columns,results[0]))
-        except:
-            raise Exception(f'Error finding rank requirement {results}')
-        
-    def get_all_ranks(self):
-        query = f"""
-        SELECT * FROM rank_requirements
-        """
-        results = read_query(query)
-        try:
-            columns = ['Rank_ID','Rank_Name','Role_ID','Raids','Defenses','Defense Trainings','Prism Trainings']
-            return [dict(zip(columns,rank)) for rank in results]
-        except:
-            return f'Error getting all ranks {results}'
         
     def set_user_stat(self, id, stat, value):
         try:
@@ -237,3 +187,28 @@ class DB():
         except:
             raise Exception('Could not delete medal')
         
+    def has_user_passed_mr_vote(self, user):
+        try:
+            query = f"""
+            SELECT User_ID FROM users WHERE User_ID = {user} AND Passed_MR_Vote = 1;
+            """
+            result = read_query(query)
+            if result:
+                return True
+            else:
+                return False
+        except:
+            raise Exception('Could not find user')
+        
+    def has_user_passed_entrance_exam(self, user):
+        try:
+            query = f"""
+            SELECT User_ID FROM users WHERE User_ID = {user} AND Passed_Entrance_Exam = 1;
+            """
+            result = read_query(query)
+            if result:
+                return True
+            else:
+                return False
+        except:
+            raise Exception('Could not find user')

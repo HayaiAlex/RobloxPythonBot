@@ -1,12 +1,10 @@
 from aiohttp import web
 from aiohttp_swagger import *
 from discord.ext import commands, tasks
-import discord
-import os
-import json
-import aiohttp
+import discord, os, json, aiohttp
 from lib.discord_functions import DiscordManager
-from lib.roblox.roblox_functions import check_for_promotions, get_roblox_ids
+from lib.progression import check_for_promotions
+from lib.roblox.roblox_functions import get_roblox_ids
 from lib.sql.queries import DB
 
 Auth = os.getenv('AUTH')

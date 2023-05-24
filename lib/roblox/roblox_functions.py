@@ -5,6 +5,30 @@ load_dotenv(override=True)
 GROUP_ID = os.getenv('GROUP_ID')
 db = DB()
 
+async def get_avatar_thumbnail(user):
+    # get the user's avatar
+    url = f"https://thumbnails.roblox.com/v1/users/avatar-bust?userIds={user.get('id')}&size=150x150&format=Png&isCircular=false"
+    request = requests.get(url)
+    response = request.json()
+    avatar_url = response['data'][0]['imageUrl']
+
+    return avatar_url
+
+def has_uniform(user):
+    # check if the user has the uniform
+    pants = 12193039426
+    shirt = 12192983374
+    url = f"https://inventory.roblox.com/v1/users/{user.get('id')}/items/0/{pants}/is-owned"
+    request = requests.get(url)
+    owns_pants = request.json()
+    if owns_pants:
+        url = f"https://inventory.roblox.com/v1/users/{user.get('id')}/items/0/{shirt}/is-owned"
+        request = requests.get(url)
+        owns_shirt = request.json()
+        if owns_shirt:
+            return True
+    return False
+
 def get_usernames_from_ids(ids):
     try:
         url = 'https://users.roblox.com/v1/users'
@@ -69,47 +93,6 @@ def get_roblox_ids(usernames):
             results.remove(user)
 
     return results
-
-def check_for_promotions(users):
-    promoted = []
-    skipped_ranks = []
-    for user in users:
-        # get the current rank of user on the database
-        try:
-            rank = db.get_user_rank(user)
-        except Exception as err:
-            print(err)
-            rank = 0
-        
-        try:
-            deserved_rank = db.get_highest_possible_rank(user)
-        except Exception as err:
-            print(err)
-            deserved_rank = 0
-        print(f"rank: {rank}, deserved rank: {deserved_rank}")
-
-        # always check if they are the correct rank in the group
-        role = get_role_in_group(user,GROUP_ID)
-        print(f"Actual role in group is: {role['rank']}")
-        if role['rank'] >= 10:
-            if rank != role['rank']:
-                db.update_rank(user, role['rank'])
-            print(f"{user} is the correct rank.")
-            continue
-        
-        if role['rank'] != deserved_rank and role['rank'] > 0:
-            # if they are conscript and being promoted multiple ranks they probably left so prompt reset stats
-            if role['rank'] == 1 and deserved_rank > 2:
-                skipped_ranks.append(user)
-
-            print(f"Promote user {user} to {deserved_rank}")
-            response = robloxpy.User.Groups.Internal.ChangeRank(GROUP_ID,user,rank)
-            if response == 'Sent':
-                db.update_rank(user, deserved_rank)
-                promoted.append(user)
-        else:
-            print(f"{user} is the correct rank.")
-    return (promoted, skipped_ranks)
 
 def get_role_in_group(user_id, group_id):
     url = f"https://groups.roblox.com/v2/users/{user_id}/groups/roles"

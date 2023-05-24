@@ -1,6 +1,7 @@
-import os, discord, json
+import os, discord, json, robloxpy
 from discord.ext import commands
-from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions
+from lib.roblox.roblox_functions import get_roblox_ids, get_role_in_group
+from lib.progression import check_for_promotions, get_top_rank
 from lib.discord_functions import DiscordManager
 from lib.sql.queries import DB
 
@@ -60,7 +61,18 @@ class Progression(commands.Cog):
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
         
-        embed = discordManager.get_profile_embed(user)
+        embed = await discordManager.get_profile_embed(user)
+        await ctx.respond("", embed=embed)
+
+    @discord.slash_command(name="progress", description = "shows what you need next to progress in your career")
+    async def progress(self, ctx: discord.ApplicationContext,
+                          user: discord.Option(str,required=False, description='View your own or another player\'s progress')):
+        if user == None:
+            user = ctx.user.mention
+        user = get_roblox_ids(user)[0]
+        id = user.get('id')
+        profile = db.get_data_from_id(id)
+        embed = await discordManager.get_progress_embed(user, top_rank=get_top_rank(profile))
         await ctx.respond("", embed=embed)
 
     @discord.slash_command(name="update", description = "updates a user's roles")

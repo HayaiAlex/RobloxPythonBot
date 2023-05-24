@@ -1,4 +1,5 @@
-from lib.roblox.roblox_functions import get_roblox_ids, check_for_promotions, get_role_in_group
+from lib.roblox.roblox_functions import get_roblox_ids, get_role_in_group
+from lib.progression import check_for_promotions
 
 def test_get_ids():
     users = get_roblox_ids('Shinyehh <@159435000184307713> 123')
