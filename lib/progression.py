@@ -1,3 +1,4 @@
+import requests
 import robloxpy, os
 from lib.roblox.roblox_functions import get_role_in_group
 from lib.sql.queries import DB
@@ -90,7 +91,12 @@ def check_for_promotions(users):
                 skipped_ranks.append(user)
 
             print(f"Promote user {user} to {deserved_rank}")
-            response = robloxpy.User.Groups.Internal.ChangeRank(GROUP_ID,user,rank)
+            # get role id from roblox api
+            roles = requests.get(f"https://groups.roblox.com/v1/groups/{GROUP_ID}/roles").json()['roles']
+            # get the role id of the deserved rank
+            role = [role for role in roles if role['rank'] == deserved_rank][0]
+            role_id = role['id']
+            response = robloxpy.User.Groups.Internal.ChangeRank(GROUP_ID,user,role_id)
             if response == 'Sent':
                 db.update_rank(user, deserved_rank)
                 promoted.append(user)

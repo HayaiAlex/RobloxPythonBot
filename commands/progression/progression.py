@@ -53,44 +53,7 @@ class Progression(commands.Cog):
                 discordManager.update_roles(user)
         else:
             await ctx.respond(f'No events awarded. Please check your player list.')
-
-    @discord.slash_command(name="profile", description = "shows a player's career profile")
-    async def profile(self, ctx: discord.ApplicationContext, 
-                      user: discord.Option(str,required=False, description='View your own or another player\'s profile')):
-        if user == None:
-            user = ctx.user.mention
-        user = get_roblox_ids(user)[0]
-        
-        embed = await discordManager.get_profile_embed(user)
-        await ctx.respond("", embed=embed)
-
-    @discord.slash_command(name="progress", description = "shows what you need next to progress in your career")
-    async def progress(self, ctx: discord.ApplicationContext,
-                          user: discord.Option(str,required=False, description='View your own or another player\'s progress')):
-        if user == None:
-            user = ctx.user.mention
-        user = get_roblox_ids(user)[0]
-        id = user.get('id')
-        profile = db.get_data_from_id(id)
-        embed = await discordManager.get_progress_embed(user, top_rank=get_top_rank(profile))
-        await ctx.respond("", embed=embed)
-
-    @discord.slash_command(name="update", description = "updates a user's roles")
-    async def update_roles(self, ctx: discord.ApplicationContext, 
-                           user: discord.Option(str,required=False)):
-        if user == None:
-            user = ctx.user.mention
-        user = get_roblox_ids(user)[0]
-        await ctx.respond(f"Checking {user.get('username')}...")
-        
-        # update their rank
-        check_for_promotions([user.get('id')])
-        # update their roles
-        await discordManager.update_roles(user)
-        
-        # edit preious sent message
-        await ctx.interaction.edit_original_response(content=f"Updated {user.get('username')}'s roles.")
-        
+            
 
     @discord.slash_command(name="setevent", description="manually set a player's events stats")
     async def set_events(self, ctx: discord.ApplicationContext, 

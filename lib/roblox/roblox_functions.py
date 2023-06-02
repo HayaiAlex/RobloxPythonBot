@@ -3,6 +3,7 @@ from lib.sql.queries import DB
 from dotenv import load_dotenv
 load_dotenv(override=True)
 GROUP_ID = os.getenv('GROUP_ID')
+PRISM_API = os.getenv('PRISM_API')
 db = DB()
 
 async def get_avatar_thumbnail(user):
@@ -104,4 +105,13 @@ def get_role_in_group(user_id, group_id):
     except:
         return {'name':'[0] Visitor','rank':0}
     
-
+def get_ordered_datastore_stat(user, unverse_id, datastore_name):
+    url = f"https://apis.roblox.com/ordered-data-stores/v1/universes/{unverse_id}/orderedDataStores/{datastore_name}/scopes/global/entries/{user}"
+    try:
+      request = requests.get(
+        url,
+        headers={'x-api-key': PRISM_API})
+      response = request.json()
+      return response.get('value')
+    except:
+      return None

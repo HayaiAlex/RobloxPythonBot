@@ -212,3 +212,4 @@ class DB():
                 return False
         except:
             raise Exception('Could not find user')
+        

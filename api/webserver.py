@@ -55,8 +55,6 @@ class Webserver(commands.Cog):
             if request.headers.get('authorization') != Auth:
                 return web.Response(status=401)
             try:
-                data = await request.json()
-                print(data)
                 id = data.pop('id')
                 print(f"update user {id}")
                 msg = ""
