@@ -70,7 +70,7 @@ class Webserver(commands.Cog):
             except:
                 return web.Response(status=404)
             
-            
+        
         @routes.get('/medal', allow_head=False)
         async def get_medal(request):
             try:
@@ -83,7 +83,7 @@ class Webserver(commands.Cog):
             except:
                 return web.Response(status=404)
             
-        @routes.get('/all-smedals', allow_head=False)
+        @routes.get('/all-medals', allow_head=False)
         async def get_all_medals(request):
             try:
                 print(f"getting all medals")
@@ -106,7 +106,7 @@ class Webserver(commands.Cog):
             print("award hit")
 
             users = [user for user in get_roblox_ids(users)]
-        
+            print(users)
             try:
                 awarded = db.award(event,users)
                 could_not_find = [user.get('username') for user in users if user.get('username').lower() not in [user.get('username').lower() for user in awarded]]

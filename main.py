@@ -13,6 +13,7 @@ intents.members = True
 bot = commands.Bot(intents=intents)
 
 bot.load_extension('commands.progression')
+bot.load_extension('commands.join_manager')
 bot.load_extension('commands.medals')
 bot.load_extension('api.webserver')
 

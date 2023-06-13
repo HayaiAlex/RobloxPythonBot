@@ -95,7 +95,7 @@ class Profile(commands.Cog):
         embed.description = description
         embed.set_footer(text="Make your career great today!")
         embed.set_author(name="Ventis Group Datacenter", icon_url="https://i.imgur.com/YT9EJty.png")
-        avatar_image = await get_avatar_thumbnail(user)
+        avatar_image = await get_avatar_thumbnail(user.get('id'))
         embed.set_thumbnail(url=avatar_image)
         embed.timestamp = datetime.datetime.now()
         return embed    
