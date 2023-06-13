@@ -1,6 +1,7 @@
 import datetime, robloxpy, requests, os, discord
 from gsheets import Sheets
 from discord.ext import tasks, commands
+from lib.discord_functions import get_rover_data_from_roblox_id
 from lib.roblox.roblox_functions import accept_join_request, decline_join_request, get_group_roles, get_avatar_thumbnail, get_recent_badges
 
 GROUP_ID = os.getenv('GROUP_ID')
@@ -66,7 +67,7 @@ class JoinManager(commands.Cog):
 
     async def create_join_request_view(self, user):
         print("Creating join request view")
-        view = self.JoinRequestView(user, self.get_home_embed, self.get_groups_embed, self.get_badges_embed)
+        view = self.JoinRequestView(self.bot, user, self.get_home_embed, self.get_groups_embed, self.get_badges_embed)
         channel = self.bot.get_channel(1046506345618210918)
 
 
@@ -151,8 +152,15 @@ class JoinManager(commands.Cog):
         else:
             description += "**This user does not belong to any groups**\n"
         for group in user.get('groups'):
-            description += f"**{group['group']['name']}**: {group['role']['name']}, Rank {group['role']['rank']} {'👍' if group['role']['rank'] > 2 else ''}\n"
-
+            description += f"**{group['group']['name']}**: {group['role']['name']}, Rank {group['role']['rank']}"
+            if group['role']['rank'] == 255:
+                icon = "<:HisokaSeal:1118224760636190812>\n"
+            elif group['role']['rank'] > 2:
+                icon = "<:AezijiSeal:1118224784598241380>\n"
+            else:
+                icon = "\n"
+            description += icon
+            
         embed.description = description
         thumbnail = await get_avatar_thumbnail(user.get("userId"),"full")
         embed.set_image(url=thumbnail)
@@ -195,8 +203,9 @@ class JoinManager(commands.Cog):
         return embed
     
     class JoinRequestView(discord.ui.View):
-        def __init__(self, user, get_home_embed, get_groups_embed, get_badges_embed):
+        def __init__(self, bot:discord.Bot, user, get_home_embed, get_groups_embed, get_badges_embed):
             super().__init__(timeout=None)
+            self.bot = bot
             self.user = user
             self.get_home_embed = get_home_embed
             self.get_groups_embed = get_groups_embed
@@ -234,6 +243,14 @@ class JoinManager(commands.Cog):
 
             decline_join_request(self.user.get('userId'))
 
+            try:
+                rover_member = get_rover_data_from_roblox_id(self.user.get('userId'))
+                member = interaction.guild.get_member(rover_member['user']['id'])
+                dm_channel = await self.bot.create_dm(member)
+                await dm_channel.send(f"Your request to join The Grand Union of Frostaria has been declined. You can message a ")
+            except:
+                pass
+
             if not self.current_embed:
                 self.current_embed = await self.get_home_embed(self.user)
             await interaction.message.edit(embed=self.current_embed, view=self)
@@ -247,6 +264,14 @@ class JoinManager(commands.Cog):
             self.add_item(discord.ui.Button(label=f"{interaction.user.display_name} accepted {self.user.get('username')}", row=1, style=discord.ButtonStyle.blurple, emoji="👍", disabled=True))
 
             accept_join_request(self.user.get('userId'))
+
+            try:
+                rover_member = get_rover_data_from_roblox_id(self.user.get('userId'))
+                member = interaction.guild.get_member(rover_member['user']['id'])
+                dm_channel = await self.bot.create_dm(member)
+                await dm_channel.send(f"Congratulations! Your request to join The Grand Union of Frostaria has been accepted!")
+            except:
+                pass
 
             if not self.current_embed:
                 self.current_embed = await self.get_home_embed(self.user)

@@ -11,6 +11,15 @@ db = DB()
 GROUP_ID = os.getenv('GROUP_ID')
 GUILD_ID = os.getenv('DISCORD_GUILD')
 
+def get_rover_data_from_roblox_id(user_id):
+    API = os.getenv('ROVERIFY_API')
+    url = f"http://registry.rover.link/api/guilds/{GUILD_ID}/roblox-to-discord/{user_id}"
+    request = requests.get(url,headers={'Authorization': f"Bearer {API}"})
+    response = request.json()
+    if request.status_code == 200:
+        return response['discordUsers'][0]
+    return {}
+
 class DiscordManager():
     def __init__(self, bot:discord.Bot):
         self.bot = bot
