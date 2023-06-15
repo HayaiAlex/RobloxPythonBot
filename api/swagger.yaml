@@ -5,7 +5,7 @@ info:
   description: A list of all the endpoints that you may access the guf infocenter from.
 tags:
   - name: Player
-  - name: Medal
+  - name: Commendation
   - name: Miscellaneous
 paths:
   /:
@@ -74,7 +74,7 @@ paths:
   /commendation:
     get:
       tags:
-        - Medal
+        - Commendation
       summary: Get a commendation's information
       produces:
         - application/json
@@ -107,12 +107,12 @@ paths:
                   type: integer
                   format: int64
         404:
-          description: Medal not found
+          description: Commendation not found
  
   /all-commendations:
     get:
       tags:
-        - Medal
+        - Commendation
       summary: Get a list of all commendations
       produces:
         - application/json
@@ -122,7 +122,7 @@ paths:
           schema:
             type: object
             properties:
-              Medal:
+              Commendation:
                 type: object
                 properties:
                   Name:
