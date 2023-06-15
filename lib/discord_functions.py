@@ -38,7 +38,6 @@ class DiscordManager():
         self.bot = bot
 
     async def update_roles(self, user):
-        # next, update their roles
         current_rank = db.get_user_rank(user.get('id'))
         print(f"Current rank: {current_rank}")
         guild:discord.Guild = await self.bot.fetch_guild(GUILD_ID)
@@ -51,13 +50,26 @@ class DiscordManager():
         
         new_rank_role = discord.utils.get(guild.roles, name=rank_name)
     
-        discord_user = get_discord_user(guild, user.get('id'))
+        discord_user = await get_discord_user(guild, user.get('id'))
 
         # remove all rank roles that may or may not be incorrect
         rank_roles = [role for role in await guild.fetch_roles() if role.name in ranks[0]]
-        print(rank_roles)
         await discord_user.remove_roles(*rank_roles)
         await discord_user.add_roles(new_rank_role)
+
+        # update commendation roles
+        # get all commendation roles
+        commendation_role_ids = [comm['Role ID'] for comm in db.get_all_commendations() if comm['Role ID'] != None]
+        # get all commendations the user has that have a role
+        user_commendation_ids = [comm['Role ID'] for comm in db.get_user_commendations(user.get('id')) if comm['Role ID'] != None]
+
+        # remove all commendation roles that may or may not be incorrect
+        guild_roles = await guild.fetch_roles()
+        commendation_roles = [role for role in guild_roles if role.id in commendation_role_ids]
+        await discord_user.remove_roles(*commendation_roles)
+        # add the commendation roles the user has
+        commendation_roles = [role for role in guild_roles if role.id in user_commendation_ids]
+        await discord_user.add_roles(*commendation_roles)
 
     class ResetStatsView(discord.ui.View): # Create a class called MyView that subclasses discord.ui.View
         def __init__(self, user, event=None):

@@ -246,23 +246,18 @@ class Commendations(commands.Cog):
         # Update roles for all users with the commendation
         # Note: Check that previously assigned comm roles are correctly removed
         for user in commendation_data['Users']:
-            print(type(user))
-            print(user)
             try:
-                print("Trying to add role")
                 member = await get_discord_user(ctx.guild, user)
-                print(member)
                 if member == None:
                     continue
                 await member.add_roles(ctx.guild.get_role(role))
-                print("Added role")
                 if previous_role != None and previous_role != role:
                     await member.remove_roles(ctx.guild.get_role(previous_role))
-                    print("Removed old role")
             except:
                 print("Something went wrong")
         
-        await ctx.respond(f"Successfully assigned role {ctx.guild.get_role(role).mention} to commendation **{commendation_data['Name']}**")
+        role_mention = ctx.guild.get_role(role).mention
+        await ctx.respond(f"Successfully assigned role {role_mention} to commendation **{commendation_data['Name']}**")
 
     @role_commands.command(name="remove", description = "Remove the link between a role and a commendation")
     async def removeRoleFromCommendation(self, ctx: discord.ApplicationContext, 
@@ -289,4 +284,5 @@ class Commendations(commands.Cog):
             except:
                 continue
 
-        await ctx.respond(f"Successfully removed role {ctx.guild.get_role(previous_role).mention} from commendation **{commendation_data['Name']}**")
+        role_mention = ctx.guild.get_role(previous_role).mention
+        await ctx.respond(f"Successfully removed role {role_mention} from commendation **{commendation_data['Name']}**")

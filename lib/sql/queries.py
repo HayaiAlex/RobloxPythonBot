@@ -120,10 +120,10 @@ class DB():
     def get_user_commendations(self,id:int):
         try:
             query = f"""
-            SELECT commendations.Commendation_ID, Emote, Name, Description, Created, Type, Quantity FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE users.User_ID = {id};
+            SELECT commendations.Commendation_ID, Emote, Name, Description, Role_ID, Created, Type, Quantity FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE users.User_ID = {id};
             """
             results = read_query(query)
-            columns = ['ID','Emote','Name','Description','Created','Type','Quantity']
+            columns = ['ID','Emote','Name','Description','Role ID','Created','Type','Quantity']
             commendations = [dict(zip(columns,rank)) for rank in results]
             return commendations
         except:

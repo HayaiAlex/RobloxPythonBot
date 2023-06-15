@@ -15,14 +15,15 @@ db = DB()
 
 def setup(bot):
     bot.add_cog(Update(bot))
+    print("setup update commands")
 
 class Update(commands.Cog):
     def __init__(self, bot:discord.Bot):
         self.bot = bot
         self.discord_manager = DiscordManager(bot)
 
-    @discord.slash_command(name="update", description = "updates a user's roles")
-    async def update_roles(self, ctx: discord.ApplicationContext, 
+    @discord.slash_command(name="update-player", description = "Updates a user's rank and roles")
+    async def update_player(self, ctx: discord.ApplicationContext, 
                            user: discord.Option(str,required=False)):
         if user == None:
             user = ctx.user.mention
@@ -38,7 +39,7 @@ class Update(commands.Cog):
         await ctx.interaction.edit_original_response(content=f"Updated {user.get('username')}'s roles.")
         
 
-    @discord.slash_command(name="updatestats", description = "updates all users' stats")
+    @discord.slash_command(name="update-stats", description = "Updates all users' stats")
     async def update_roles(self, ctx: discord.ApplicationContext, 
                            user: discord.Option(str,required=False)):
         if user == None:
