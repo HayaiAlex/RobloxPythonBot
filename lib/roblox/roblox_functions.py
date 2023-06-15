@@ -61,7 +61,6 @@ def get_roblox_ids(usernames):
     # First, process the usernames that are already numeric strings
     ids = [id for id in usernames if id.isdigit()]
     results = get_usernames_from_ids(ids)
-    
     # Next, process the usernames that are Discord mentions
     for username in usernames:
         if username.startswith('<@') and username.endswith('>'):
@@ -90,17 +89,16 @@ def get_roblox_ids(usernames):
                 results.append({'username':user.get('name'), 'id':user.get('id')})
 
             for user in remaining_usernames:
-                if user not in [user['username'] for user in results]:
+                if user.lower() not in [user['username'].lower() for user in results]:
                     results.append({'username':user, 'id':None})
         except:
             pass
-
+    
     # lastly remove duplicates
     for user in results:
         if results.count(user) > 1:
             results.remove(user)
 
-    print(results)
     return results
 
 def get_recent_badges(user_id, limit=100):
