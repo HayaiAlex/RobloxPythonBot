@@ -20,6 +20,19 @@ def get_rover_data_from_roblox_id(user_id):
         return response['discordUsers'][0]
     return {}
 
+async def get_discord_user(guild, user_id):
+    print('getting discord user')
+    # user rover to get their discord id
+    API = os.getenv('ROVERIFY_API')
+    url = f"http://registry.rover.link/api/guilds/{GUILD_ID}/roblox-to-discord/{user_id}"
+    request = requests.get(url,headers={'Authorization': f"Bearer {API}"})
+    print(request)
+    response = request.json()
+    print(response)
+    users_discord_id = response['discordUsers'][0]['user']['id']
+    print(users_discord_id)
+    return await guild.fetch_member(users_discord_id)
+
 class DiscordManager():
     def __init__(self, bot:discord.Bot):
         self.bot = bot
@@ -37,15 +50,8 @@ class DiscordManager():
         print(f"Rank name: {rank_name}")
         
         new_rank_role = discord.utils.get(guild.roles, name=rank_name)
-
-        # user rover to get their discord id
-        API = os.getenv('ROVERIFY_API')
-        url = f"http://registry.rover.link/api/guilds/{GUILD_ID}/roblox-to-discord/{user.get('id')}"
-        request = requests.get(url,headers={'Authorization': f"Bearer {API}"})
-        response = request.json()
-        users_discord_id = response['discordUsers'][0]['user']['id']
-
-        discord_user = await guild.fetch_member(users_discord_id)
+    
+        discord_user = get_discord_user(guild, user.get('id'))
 
         # remove all rank roles that may or may not be incorrect
         rank_roles = [role for role in await guild.fetch_roles() if role.name in ranks[0]]

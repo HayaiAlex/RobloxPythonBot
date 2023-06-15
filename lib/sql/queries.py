@@ -242,6 +242,24 @@ class DB():
         except:
             raise Exception('Could not delete commendation')
         
+    def assign_role_to_commendation(self, id, role_id):
+        try:
+            query = f"""
+            UPDATE commendations SET Role_ID = {role_id} WHERE Commendation_ID = {id};
+            """
+            execute_query(query)
+        except:
+            raise Exception('Could not assign role to commendation')
+        
+    def remove_role_from_commendation(self, id):
+        try:
+            query = f"""
+            UPDATE commendations SET Role_ID = NULL WHERE Commendation_ID = {id};
+            """
+            execute_query(query)
+        except:
+            raise Exception('Could not remove role from commendation')
+        
     def has_user_passed_mr_vote(self, user):
         try:
             query = f"""

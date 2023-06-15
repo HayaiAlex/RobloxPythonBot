@@ -1,7 +1,7 @@
 import os, discord, json
 from discord.ext import commands
 from lib.roblox.roblox_functions import get_roblox_ids, get_avatar_thumbnail
-from lib.discord_functions import DiscordManager
+from lib.discord_functions import DiscordManager, get_discord_user
 from lib.sql.queries import DB
 
 GROUP_ID = os.getenv('GROUP_ID')
@@ -161,11 +161,69 @@ class Commendations(commands.Cog):
 
     @role_commands.command(name="assign", description = "Assign a role that will automatically be given to anyone who has this commendation")
     async def assignRoleToCommendation(self, ctx: discord.ApplicationContext, 
-                                id: discord.Option(int, required=True, description='Commendation ID'), 
-                                role: discord.Option(str,required=True, description='The role ID')):
-        pass
+                                comm_id: discord.Option(int, name='commendation-id', description='Commendation ID'), 
+                                role: discord.Option(str, description='The role ID')):
+        role = int(role)
+        # Check if the role is valid
+        if ctx.guild.get_role(role) == None:
+            await ctx.respond(f"Could not find a role with that id.")
+            return
+
+        # Check if the commendation is valid
+        try:
+            commendation_data = db.get_commendation_info(comm_id)
+            previous_role = commendation_data['Role ID']
+        except:
+            await ctx.respond(f"Could not find a commendation with that id.")
+            return
+        
+        # Assign the role to the commendation
+        db.assign_role_to_commendation(comm_id, role)
+
+        # Update roles for all users with the commendation
+        # Note: Check that previously assigned comm roles are correctly removed
+        for user in commendation_data['Users']:
+            print(type(user))
+            print(user)
+            try:
+                print("Trying to add role")
+                member = await get_discord_user(ctx.guild, user)
+                print(member)
+                if member == None:
+                    continue
+                await member.add_roles(ctx.guild.get_role(role))
+                print("Added role")
+                if previous_role != None and previous_role != role:
+                    await member.remove_roles(ctx.guild.get_role(previous_role))
+                    print("Removed old role")
+            except:
+                print("Something went wrong")
+        
+        await ctx.respond(f"Successfully assigned role {ctx.guild.get_role(role).mention} to commendation **{commendation_data['Name']}**")
 
     @role_commands.command(name="remove", description = "Remove the link between a role and a commendation")
     async def removeRoleFromCommendation(self, ctx: discord.ApplicationContext, 
-                                  id: discord.Option(int, required=True, description='Commendation ID')):
-        pass
+                                  comm_id: discord.Option(int, name='commendation-id', description='Commendation ID')):
+        
+        # Check if the commendation is valid
+        try:
+            commendation_data = db.get_commendation_info(comm_id)
+            previous_role = commendation_data['Role ID']
+        except:
+            await ctx.respond(f"Could not find a commendation with that id.")
+            return
+        
+        # Remove the role from the commendation
+        db.remove_role_from_commendation(comm_id)
+
+        # Update roles for all users with the commendation
+        for user in commendation_data['Users']:
+            try:
+                member = await get_discord_user(ctx.guild, user)
+                if member == None:
+                    continue
+                await member.remove_roles(ctx.guild.get_role(previous_role))
+            except:
+                continue
+
+        await ctx.respond(f"Successfully removed role {ctx.guild.get_role(previous_role).mention} from commendation **{commendation_data['Name']}**")
