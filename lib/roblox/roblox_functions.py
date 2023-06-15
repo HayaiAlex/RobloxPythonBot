@@ -50,14 +50,19 @@ def get_usernames_from_ids(ids):
         return [] 
 
 def get_roblox_ids(usernames):
+    # remove commas
+    usernames = usernames.replace(",", " ")
+
+    # remove any extra spaces
     while "  " in usernames:
         usernames = usernames.replace("  ", " ")
     usernames = usernames.split(" ")
-
+    print(usernames)
     # First, process the usernames that are already numeric strings
     ids = [id for id in usernames if id.isdigit()]
     results = get_usernames_from_ids(ids)
     
+    print(results)
     # Next, process the usernames that are Discord mentions
     for username in usernames:
         if username.startswith('<@') and username.endswith('>'):
@@ -73,8 +78,9 @@ def get_roblox_ids(usernames):
                 results.append({'username':username, 'id':None})
     
     
+    print(results)
     remaining_usernames = [u for u in usernames if u not in [str(user.get('id')) for user in results] and not u.startswith('<@')]
-
+    print(remaining_usernames)
     if remaining_usernames:
         try:
             url = 'https://users.roblox.com/v1/usernames/users'
@@ -83,7 +89,7 @@ def get_roblox_ids(usernames):
                 'excludeBannedUsers': True
             })
             response = request.json()['data']
-            
+            print(response)
             # May not include all ids if a user with this name on roblox does not exist
             for user in response:
                 results.append({'username':user.get('name'), 'id':user.get('id')})
@@ -99,6 +105,7 @@ def get_roblox_ids(usernames):
         if results.count(user) > 1:
             results.remove(user)
 
+    print(results)
     return results
 
 def get_recent_badges(user_id, limit=100):
