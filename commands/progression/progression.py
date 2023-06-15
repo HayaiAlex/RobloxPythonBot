@@ -55,7 +55,7 @@ class Progression(commands.Cog):
             await ctx.respond(f'No events awarded. Please check your player list.')
             
 
-    @discord.slash_command(name="setevent", description="manually set a player's events stats")
+    @discord.slash_command(name="set-event", description="manually set a player's events stats")
     async def set_events(self, ctx: discord.ApplicationContext, 
                          user: discord.Option(str, name="player", description="The person you would like to change event stats of"), 
                          event: discord.Option(str, choices=events, name="event", description="Type of event to set"), 

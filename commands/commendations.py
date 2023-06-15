@@ -16,13 +16,10 @@ def setup(bot):
 
 
 class Commendations(commands.Cog):
-    commendation_commands = discord.SlashCommandGroup("commendation", "Commendation Commands")
-    role_commands = commendation_commands.create_subgroup("role", "Role Commands")
-
     def __init__(self, bot:discord.Bot):
         self.bot = bot
 
-    @commendation_commands.command(name="list", description = "List all commendations")
+    @discord.slash_command(name="commendation-list", description = "List all commendations")
     async def list(self, ctx: discord.ApplicationContext):
         commendations = db.get_all_commendations()
         commendations_per_page = 8
@@ -52,7 +49,7 @@ class Commendations(commands.Cog):
 
         await paginator.respond(ctx.interaction)
 
-    @commendation_commands.command(name="info", description = "Get info about a commendation")
+    @discord.slash_command(name="commendation-info", description = "Get info about a commendation")
     async def info(self, ctx: discord.ApplicationContext,
                      desired_commendation: discord.Option(str, name='commendation', description='The name or ID of the commendation')):
         
@@ -84,7 +81,7 @@ class Commendations(commands.Cog):
         await ctx.respond(embed=embed)
         
 
-    @commendation_commands.command(name="create", description = "Create a new commendation")
+    @discord.slash_command(name="commendation-create", description = "Create a new commendation")
     async def create(self, ctx: discord.ApplicationContext, 
                      title: discord.Option(str,required=True, description='The title of the commendation'), 
                      comm_type: discord.Option(str,required=True, name='type', description='The type of commendation (medal or ribbon)', choices=["Medal","Ribbon"]),
@@ -116,7 +113,7 @@ class Commendations(commands.Cog):
             self.embed.title = "Kept Commendation"
             await interaction.response.edit_message(view=self, embed=self.embed)
     
-    @commendation_commands.command(name="delete", description = "Delete a commendation from the database")
+    @discord.slash_command(name="commendation-delete", description = "Delete a commendation from the database")
     async def delete(self, ctx: discord.ApplicationContext, 
                      id: discord.Option(int, required=True, description='Commendation ID')):
 
@@ -142,7 +139,7 @@ class Commendations(commands.Cog):
         except:            
             return None
     
-    @commendation_commands.command(name="award", description = "Award a commendation to player(s)")
+    @discord.slash_command(name="commendation-award", description = "Award a commendation to player(s)")
     async def awardCommendation(self, ctx: discord.ApplicationContext, 
                          desired_commendation: discord.Option(str, name='commendation', description='The name or ID of the commendation'), 
                          users: discord.Option(str, name='players', description='The name, ID, or @mention of the user to award the commendation to')):
@@ -180,7 +177,7 @@ class Commendations(commands.Cog):
             except Exception as e:
                 await ctx.respond(e)
 
-    @commendation_commands.command(name="unaward", description = "Unaward a commendation from player(s)")
+    @discord.slash_command(name="commendation-unaward", description = "Unaward a commendation from player(s)")
     async def unawardCommendation(self, ctx: discord.ApplicationContext, 
                          desired_commendation: discord.Option(str, name='commendation', description='The name or ID of the commendation'), 
                          users: discord.Option(str, name='players', description='The name, ID, or @mention of the user to award the commendation to'),
@@ -221,8 +218,7 @@ class Commendations(commands.Cog):
                 await ctx.respond(e)
 
 
-
-    @role_commands.command(name="assign", description = "Assign a role that will automatically be given to anyone who has this commendation")
+    @discord.slash_command(name="commendation-role-assign", description = "Assign a role that will automatically be given to anyone who has this commendation")
     async def assignRoleToCommendation(self, ctx: discord.ApplicationContext, 
                                 comm_id: discord.Option(int, name='commendation-id', description='Commendation ID'), 
                                 role: discord.Option(str, description='The role ID')):
@@ -259,7 +255,7 @@ class Commendations(commands.Cog):
         role_mention = ctx.guild.get_role(role).mention
         await ctx.respond(f"Successfully assigned role {role_mention} to commendation **{commendation_data['Name']}**")
 
-    @role_commands.command(name="remove", description = "Remove the link between a role and a commendation")
+    @discord.slash_command(name="commendation-role-remove", description = "Remove the link between a role and a commendation")
     async def removeRoleFromCommendation(self, ctx: discord.ApplicationContext, 
                                   comm_id: discord.Option(int, name='commendation-id', description='Commendation ID')):
         
