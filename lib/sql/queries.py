@@ -133,7 +133,7 @@ class DB():
     def get_commendation_info(self,id:int):
         try:
             commendation_query = f"""
-            SELECT Name, Emote, Description, Role_ID, Created, Type FROM commendations WHERE commendations.Commendation_ID = {id};
+            SELECT Commendation_ID, Name, Emote, Description, Role_ID, Created, Type FROM commendations WHERE commendations.Commendation_ID = {id};
             """
             commendation_data = read_query(commendation_query)[0]
             
@@ -143,7 +143,7 @@ class DB():
             users = read_query(users_query)
             users = [user[0] for user in users]
             
-            columns = ["Name", "Emote", "Description", "Role ID", "Created", "Type"]
+            columns = ["ID", "Name", "Emote", "Description", "Role ID", "Created", "Type"]
             commendation_data = dict(zip(columns,commendation_data))
 
             commendation_data['Users'] = users

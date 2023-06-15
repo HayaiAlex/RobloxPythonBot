@@ -1,5 +1,6 @@
-import os, discord, json
+import os, discord
 from discord.ext import commands
+from discord.ext.pages import Paginator, Page
 from lib.roblox.roblox_functions import get_roblox_ids, get_avatar_thumbnail
 from lib.discord_functions import DiscordManager, get_discord_user
 from lib.sql.queries import DB
@@ -20,6 +21,68 @@ class Commendations(commands.Cog):
 
     def __init__(self, bot:discord.Bot):
         self.bot = bot
+
+    @commendation_commands.command(name="list", description = "List all commendations")
+    async def list(self, ctx: discord.ApplicationContext):
+        commendations = db.get_all_commendations()
+        commendations_per_page = 8
+        commendation_by_page = []
+        commendations.reverse()
+        for (index, commendation) in enumerate(commendations):
+            page = int(index/commendations_per_page)
+            content = f"[{commendation['ID']}] **{commendation['Emote']} {commendation['Name']}**\n{commendation['Description']}"
+            try:
+                commendation_by_page[page].append(content)
+            except:
+                commendation_by_page.append([content])
+
+        pages = []
+        for (index, commendation_page) in enumerate(commendation_by_page):
+            header = discord.Embed(
+                color=discord.Colour.from_rgb(255,255,255)
+            )
+            header.set_image(url="https://i.imgur.com/qcAeijr.png")
+            body = discord.Embed(
+                description= "\n\n".join(commendation_page),
+                color=discord.Colour.from_rgb(10,10,10)
+            )
+            pages.append(Page(embeds=[header, body]))
+
+        paginator = Paginator(pages=pages)
+
+        await paginator.respond(ctx.interaction)
+
+    @commendation_commands.command(name="info", description = "Get info about a commendation")
+    async def info(self, ctx: discord.ApplicationContext,
+                     desired_commendation: discord.Option(str, name='commendation', description='The name or ID of the commendation')):
+        
+        commendation = self.get_commendation(desired_commendation)
+        if commendation == None:
+            await ctx.respond(f"Could not find commendation: {desired_commendation}")
+            return
+        commendation = db.get_commendation_info(commendation['ID'])
+        
+        embed = discord.Embed(
+            color=discord.Colour.from_rgb(10,10,10)
+        )
+
+        description = f"## {commendation['Emote']} {commendation['Name']} {commendation['Type']}\n"
+        description += commendation['Description']
+        users = [user for user in get_roblox_ids(" ".join([str(id) for id in commendation['Users']]))]
+        description += f"\n### Recipients"
+        for user in users:
+            # skips if user is banned
+            if user.get('id') == None:
+                continue
+
+            description += f"\n{user.get('username')}"
+            user_commendations = db.get_user_commendations(user.get('id'))
+            amount = [comm['Quantity'] for comm in user_commendations if comm['ID'] == commendation['ID']][0]
+            description += f" **x{amount}**" if amount > 1 else ""
+
+        embed.description = description
+        await ctx.respond(embed=embed)
+        
 
     @commendation_commands.command(name="create", description = "Create a new commendation")
     async def create(self, ctx: discord.ApplicationContext, 
