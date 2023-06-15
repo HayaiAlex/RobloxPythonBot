@@ -85,12 +85,21 @@ class Profile(commands.Cog):
 
         commendations = db.get_user_commendations(user.get('id'))
         
-        if commendations:
-            formatted_commendations = "\n".join([f"{commendation['Emote']} {commendation['Name']}" for commendation in commendations])
-        else:
-            formatted_commendations = "No commendations yet!"
+        def get_commendation_field(commendation_type):
+            if [commendation for commendation in commendations if commendation['Type'] == commendation_type]:
+                result = ''
+                for commendation in commendations:
+                    if commendation['Type'] == commendation_type:
+                        result += f"{commendation['Emote']} {commendation['Name']}"
+                        if commendation['Quantity'] > 1:
+                            result += f" **x{commendation['Quantity']}**"
+                        result += "\n"
+                return result            
+            else:
+                return f"No {commendation_type.lower()}s yet!"
 
-        embed.add_field(name="Commendations", value=formatted_commendations)
+        embed.add_field(name="Medals", value=get_commendation_field("Medal"))
+        embed.add_field(name="Ribbons", value=get_commendation_field("Ribbon"))
 
         embed.description = description
         embed.set_footer(text="Make your career great today!")
