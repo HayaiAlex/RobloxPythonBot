@@ -83,14 +83,14 @@ class Profile(commands.Cog):
             spar_stat_fields += f"**{label}:** {value}\n"
         embed.add_field(name="Spar Stats", value=spar_stat_fields)
 
-        medals = db.get_user_medals(user.get('id'))
+        commendations = db.get_user_commendations(user.get('id'))
         
-        if medals:
-            formatted_medals = "\n".join([f"{medal['Emote']} {medal['Name']}" for medal in medals])
+        if commendations:
+            formatted_commendations = "\n".join([f"{medal['Emote']} {medal['Name']}" for medal in commendations])
         else:
-            formatted_medals = "No medals yet!"
+            formatted_commendations = "No commendations yet!"
 
-        embed.add_field(name="Medals", value=formatted_medals)
+        embed.add_field(name="Commendations", value=formatted_commendations)
 
         embed.description = description
         embed.set_footer(text="Make your career great today!")

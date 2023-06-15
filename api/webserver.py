@@ -20,7 +20,7 @@ def setup(bot):
     global discordManager
     discordManager = DiscordManager(bot)
     bot.add_cog(Webserver(bot))
-
+    print("Setup complete")
 
 class Webserver(commands.Cog):
     def __init__(self, bot):
@@ -40,8 +40,8 @@ class Webserver(commands.Cog):
                 print(f"get user {request.query['id']}")
             
                 profile = db.get_data_from_id(request.query['id'])
-                medals = db.get_user_medals(request.query['id'])
-                profile['Medals'] = medals
+                commendations = db.get_user_commendations(request.query['id'])
+                profile['Commendations'] = commendations
                 data = json.dumps(profile)
 
                 return web.Response(status=200,content_type="application/json", body=data)
@@ -83,13 +83,13 @@ class Webserver(commands.Cog):
             except:
                 return web.Response(status=404)
             
-        @routes.get('/all-medals', allow_head=False)
-        async def get_all_medals(request):
+        @routes.get('/all-commendations', allow_head=False)
+        async def get_all_commendations(request):
             try:
-                print(f"getting all medals")
+                print(f"getting all commendations")
 
-                medals = db.get_all_medals()
-                data = json.dumps(medals, default=str)
+                commendations = db.get_all_commendations()
+                data = json.dumps(commendations, default=str)
 
                 return web.Response(status=200,content_type="application/json", body=data)
             except:

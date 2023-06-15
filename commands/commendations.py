@@ -11,10 +11,10 @@ discordManager = None
 def setup(bot):
     global discordManager
     discordManager = DiscordManager(bot)
-    bot.add_cog(Medals(bot))
+    bot.add_cog(Commendations(bot))
 
 
-class Medals(commands.Cog):
+class Commendations(commands.Cog):
     medal_commands = discord.SlashCommandGroup("medal", "Medal Commands")
     role_commands = medal_commands.create_subgroup("role", "Role Commands")
 

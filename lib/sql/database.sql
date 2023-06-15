@@ -26,18 +26,18 @@ VALUES (1, "[1] First", 96346577, 0, 0, 0, 0),
     (2, "[2] 2nd", 96346586, 1, 1, 1, 1),
     (3, "[3] 3rd Rank", 96346587, 3, 3, 3, 3);
 
-DROP TABLE IF EXISTS medals;
-CREATE TABLE medals (
-    Medal_ID int(11) NOT NULL,
+DROP TABLE IF EXISTS commendations;
+CREATE TABLE commendations (
+    Commendation_ID int(11) NOT NULL,
     Name varchar(255) NOT NULL,
     Description varchar(255) NOT NULL,
     Emote varchar(255),
     Role_ID bigint,
     Created timestamp NOT NULL,
-    CONSTRAINT PK_medals PRIMARY KEY (Medal_ID)
+    CONSTRAINT PK_commendations PRIMARY KEY (Commendation_ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO medals
+INSERT INTO commendations
 VALUES 
 (1, "Frostarian War Commendation - LSE War", "War commendation given to medal recipients for the LSE war", "🎖️", NULL, FROM_UNIXTIME(1612824854)),
 (2, "2021 Frostarian Easter Egg Hunt", "Found all the eggs during the Frostarian 2021 Egg Hunt at Grand Celeste", "🥚", NULL, FROM_UNIXTIME(1617320834)),
@@ -87,11 +87,11 @@ VALUES
 (46, "Frostarian 2022 Winter Present Hunt Top 10", "N/A", "🎖️", "1058866590621384824", FROM_UNIXTIME(1672524563));
 
 
-CREATE TABLE user_medals (
+CREATE TABLE user_commendations (
     User_ID bigint NOT NULL,
-    Medal_ID int(11) NOT NULL,
-    CONSTRAINT PK_user_medal PRIMARY KEY (User_ID, Medal_ID),
+    Commendation_ID int(11) NOT NULL,
+    CONSTRAINT PK_user_medal PRIMARY KEY (User_ID, Commendation_ID),
     CONSTRAINT FK_user FOREIGN KEY (User_ID) REFERENCES users(User_ID),
-    CONSTRAINT FK_medal FOREIGN KEY (Medal_ID) REFERENCES medals(Medal_ID)
+    CONSTRAINT FK_medal FOREIGN KEY (Commendation_ID) REFERENCES commendations(Commendation_ID)
 );
 

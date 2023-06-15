@@ -117,30 +117,30 @@ class DB():
             # they have no profile to reset
             pass
 
-    def get_user_medals(self,id:int):
+    def get_user_commendations(self,id:int):
         try:
             query = f"""
-            SELECT Emote, Name FROM medals JOIN user_medals ON medals.Medal_ID = user_medals.Medal_ID JOIN users ON users.User_ID = user_medals.User_ID WHERE users.User_ID = {id};
+            SELECT Emote, Name FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE users.User_ID = {id};
             """
             results = read_query(query)
             print(results)
             columns = ['Emote','Name']
-            medals = [dict(zip(columns,rank)) for rank in results]
-            print(medals)
-            return medals
+            commendations = [dict(zip(columns,rank)) for rank in results]
+            print(commendations)
+            return commendations
         except:
-            print("Error getting user's medals")
+            print("Error getting user's commendations")
             return []
 
     def get_medal_info(self,id:int):
         try:
             medal_query = f"""
-            SELECT Name, Emote, Description, Role_ID, Created FROM medals WHERE medals.Medal_ID = {id};
+            SELECT Name, Emote, Description, Role_ID, Created FROM commendations WHERE commendations.Commendation_ID = {id};
             """
             medal_data = read_query(medal_query)[0]
             
             users_query = f"""
-            SELECT users.User_ID FROM medals JOIN user_medals ON medals.Medal_ID = user_medals.Medal_ID JOIN users ON users.User_ID = user_medals.User_ID WHERE medals.Medal_ID = {id};
+            SELECT users.User_ID FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE commendations.Commendation_ID = {id};
             """
             users = read_query(users_query)
             users = [user[0] for user in users]
@@ -154,24 +154,24 @@ class DB():
         except:
             raise Exception('Could not find medal')
         
-    def get_all_medals(self):
+    def get_all_commendations(self):
         try:
             medal_query = f"""
-            SELECT Medal_ID, Name, Emote, Description, Role_ID, Created FROM medals;
+            SELECT Commendation_ID, Name, Emote, Description, Role_ID, Created FROM commendations;
             """
-            medals = read_query(medal_query)
+            commendations = read_query(medal_query)
             
             columns = ["ID", "Name", "Emote", "Description", "Role ID", "Created"]
-            medals = [dict(zip(columns,medal)) for medal in medals]
+            commendations = [dict(zip(columns,medal)) for medal in commendations]
 
-            return medals
+            return commendations
         except:
-            raise Exception('Could not find any medals')
+            raise Exception('Could not find any commendations')
         
     def create_medal(self, title, description, emote, role_id='NULL'):
         try:
             query = f"""
-            INSERT INTO medals (Name,Description,Emote,Role_ID,Created)
+            INSERT INTO commendations (Name,Description,Emote,Role_ID,Created)
             VALUES ('{title}', '{description}', '{emote}', {role_id}, CURRENT_TIMESTAMP);
             """
             execute_query(query)
@@ -181,7 +181,7 @@ class DB():
     def delete_medal(self, id):
         try:
             query = f"""
-            DELETE FROM medals WHERE Medal_ID = {id};
+            DELETE FROM commendations WHERE Commendation_ID = {id};
             """
             execute_query(query)
         except:
