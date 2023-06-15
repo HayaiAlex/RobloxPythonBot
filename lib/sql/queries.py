@@ -202,6 +202,36 @@ class DB():
             return execute_query(query)
         except:
             raise Exception('Could not award commendation') 
+        
+    def unaward_commendation(self, user_id, comm_id, remove_quantity):
+        try:       
+            # first check how many times they have been awarded it
+            awarded_count = 0
+            user_commendations = self.get_user_commendations(user_id)
+            for commendation in user_commendations:
+                if commendation['ID'] == comm_id:
+                    awarded_count = commendation['Quantity']
+
+            if awarded_count == 0:
+                return {'status':'Not awarded'}
+            
+            if awarded_count > remove_quantity:
+                query = f"""
+                UPDATE user_commendations SET Quantity = {awarded_count - remove_quantity} WHERE User_ID = {user_id} AND Commendation_ID = {comm_id};
+                """
+            else:
+                query = f"""
+                DELETE FROM user_commendations WHERE User_ID = {user_id} AND Commendation_ID = {comm_id};
+                """
+            execute_query(query)
+            remaining_commendations = awarded_count - remove_quantity
+            if remaining_commendations < 0:
+                unawarded_count = awarded_count
+            else:
+                unawarded_count = remove_quantity
+            return {'status':'Success','unawarded_count':unawarded_count}
+        except:
+            raise Exception('Could not unaward commendation') 
 
     def delete_commendation(self, id):
         try:

@@ -67,6 +67,17 @@ class Commendations(commands.Cog):
         embed.add_field(name="Description",value=f"{commendation['Description']}")
 
         await ctx.respond(embed=embed, view=self.DeleteCommendationView(id, commendation, embed))
+
+    def get_commendation(self, desired_commendation):  
+        commendations = db.get_all_commendations()
+
+        try:
+            if desired_commendation.isdigit():
+                return [comm for comm in commendations if comm['ID'] == int(desired_commendation)][0]
+            else:
+                return [comm for comm in commendations if comm['Name'].lower() == desired_commendation.lower()][0]
+        except:            
+            return None
     
     @commendation_commands.command(name="award", description = "Award a commendation to player(s)")
     async def awardCommendation(self, ctx: discord.ApplicationContext, 
@@ -74,14 +85,9 @@ class Commendations(commands.Cog):
                          users: discord.Option(str, name='players', description='The name, ID, or @mention of the user to award the commendation to')):
         
         users = [user for user in get_roblox_ids(users)]
-        commendations = db.get_all_commendations()
-
-        try:
-            if desired_commendation.isdigit():
-                commendation = [comm for comm in commendations if comm['ID'] == int(desired_commendation)][0]
-            else:
-                commendation = [comm for comm in commendations if comm['Name'].lower() == desired_commendation.lower()][0]
-        except:            
+      
+        commendation = self.get_commendation(desired_commendation)
+        if commendation == None:
             await ctx.respond(f"Could not find a commendation with that id or name.")
             return
 
@@ -92,6 +98,7 @@ class Commendations(commands.Cog):
         for user in users:
             try:
                 if user.get('id') == None:
+                    embed.set_thumbnail(url="")
                     embed.description = f"### Could not find user {user.get('username')}!"
                     await ctx.respond(embed=embed)
                     continue
@@ -112,9 +119,45 @@ class Commendations(commands.Cog):
 
     @commendation_commands.command(name="unaward", description = "Unaward a commendation from player(s)")
     async def unawardCommendation(self, ctx: discord.ApplicationContext, 
-                           title: discord.Option(str,required=True, description='The title of the commendation'), 
-                           emote: discord.Option(str,required=False, description='The emoji symbol for this commendation'), description: discord.Option(str,required=False, description='The commendation description')):
-        pass
+                         desired_commendation: discord.Option(str, name='commendation', description='The name or ID of the commendation'), 
+                         users: discord.Option(str, name='players', description='The name, ID, or @mention of the user to award the commendation to'),
+                         amount: discord.Option(int, name='amount', description='The amount of times to unaward the commendation') = 1):
+        
+        users = [user for user in get_roblox_ids(users)]
+        
+        commendation = self.get_commendation(desired_commendation)
+        if commendation == None:
+            await ctx.respond(f"Could not find a commendation with that id or name.")
+            return
+        
+        embed = discord.Embed(
+            color=discord.Colour.from_rgb(255,255,255)
+        )
+
+        for user in users:
+            try:
+                if user.get('id') == None:
+                    embed.set_thumbnail(url="")
+                    embed.description = f"### Could not find user {user.get('username')}!"
+                    await ctx.respond(embed=embed)
+                    continue
+
+                result = db.unaward_commendation(user.get('id'), commendation['ID'], amount)
+                embed.set_thumbnail(url=await get_avatar_thumbnail(user.get('id')))
+
+                if result['status'] == 'Success':
+                    if amount == 1:
+                        embed.description = f"### {user.get('username')} has lost the {commendation['Type']} {commendation['Emote']} {commendation['Name']}."
+                    else:
+                        embed.description = f"### {user.get('username')} has lost {result['unawarded_count']} {commendation['Type']}s of {commendation['Emote']} {commendation['Name']}."
+                else:
+                    embed.description = f"### {user.get('username')} does not have the {commendation['Emote']} {commendation['Name']} {commendation['Type'].lower()}."
+                await ctx.respond(embed=embed)
+
+            except Exception as e:
+                await ctx.respond(e)
+
+
 
     @role_commands.command(name="assign", description = "Assign a role that will automatically be given to anyone who has this commendation")
     async def assignRoleToCommendation(self, ctx: discord.ApplicationContext, 
