@@ -120,13 +120,11 @@ class DB():
     def get_user_commendations(self,id:int):
         try:
             query = f"""
-            SELECT Emote, Name FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE users.User_ID = {id};
+            SELECT commendations.Commendation_ID, Emote, Name, Description, Created, Type, Quantity FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE users.User_ID = {id};
             """
             results = read_query(query)
-            print(results)
-            columns = ['Emote','Name']
+            columns = ['ID','Emote','Name','Description','Created','Type','Quantity']
             commendations = [dict(zip(columns,rank)) for rank in results]
-            print(commendations)
             return commendations
         except:
             print("Error getting user's commendations")
@@ -135,7 +133,7 @@ class DB():
     def get_commendation_info(self,id:int):
         try:
             commendation_query = f"""
-            SELECT Name, Emote, Description, Role_ID, Created FROM commendations WHERE commendations.Commendation_ID = {id};
+            SELECT Name, Emote, Description, Role_ID, Created, Type FROM commendations WHERE commendations.Commendation_ID = {id};
             """
             commendation_data = read_query(commendation_query)[0]
             
@@ -145,7 +143,7 @@ class DB():
             users = read_query(users_query)
             users = [user[0] for user in users]
             
-            columns = ["Name", "Emote", "Description", "Role ID", "Created"]
+            columns = ["Name", "Emote", "Description", "Role ID", "Created", "Type"]
             commendation_data = dict(zip(columns,commendation_data))
 
             commendation_data['Users'] = users
@@ -157,27 +155,54 @@ class DB():
     def get_all_commendations(self):
         try:
             commendation_query = f"""
-            SELECT Commendation_ID, Name, Emote, Description, Role_ID, Created FROM commendations;
+            SELECT Commendation_ID, Name, Emote, Description, Role_ID, Created, Type FROM commendations;
             """
             commendations = read_query(commendation_query)
             
-            columns = ["ID", "Name", "Emote", "Description", "Role ID", "Created"]
+            columns = ["ID", "Name", "Emote", "Description", "Role ID", "Created", "Type"]
             commendations = [dict(zip(columns,commendation)) for commendation in commendations]
 
             return commendations
         except:
             raise Exception('Could not find any commendations')
         
-    def create_commendation(self, title, description, emote, role_id='NULL'):
+    def create_commendation(self, title, description, emote, comm_type, role_id='NULL'):
         try:
             query = f"""
-            INSERT INTO commendations (Name,Description,Emote,Role_ID,Created)
-            VALUES ('{title}', '{description}', '{emote}', {role_id}, CURRENT_TIMESTAMP);
+            INSERT INTO commendations (Name,Description,Emote,Role_ID,Created,Type)
+            VALUES ('{title}', '{description}', '{emote}', {role_id}, CURRENT_TIMESTAMP, '{comm_type}');
             """
             execute_query(query)
         except:
-            raise Exception('Could not create commendation')   
-        
+            raise Exception('Could not create commendation')  
+
+    def award_commendation(self, user_id, comm_id):
+        try:
+            # first check if user already has commendation
+            # if the commendation is a medal then return already awarded
+            # if the commendation is a ribbon count how many times they have been awarded it
+            awarded_count = 0
+            user_commendations = self.get_user_commendations(user_id)
+            for commendation in user_commendations:
+                if commendation['ID'] == comm_id:
+                    if commendation['Type'] == 'Medal':
+                        return 'Already awarded'
+                    elif commendation['Type'] == 'Ribbon':
+                        awarded_count = commendation['Quantity']
+                        
+            if awarded_count == 0:
+                query = f"""
+                INSERT INTO user_commendations (User_ID,Commendation_ID,Quantity)
+                VALUES ({user_id}, {comm_id}, {awarded_count + 1});
+                """
+            else:
+                query = f"""
+                UPDATE user_commendations SET Quantity = {awarded_count + 1} WHERE User_ID = {user_id} AND Commendation_ID = {comm_id};
+                """
+            return execute_query(query)
+        except:
+            raise Exception('Could not award commendation') 
+
     def delete_commendation(self, id):
         try:
             query = f"""

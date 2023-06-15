@@ -1,6 +1,6 @@
 import os, discord, json
 from discord.ext import commands
-from lib.roblox.roblox_functions import get_roblox_ids
+from lib.roblox.roblox_functions import get_roblox_ids, get_avatar_thumbnail
 from lib.discord_functions import DiscordManager
 from lib.sql.queries import DB
 
@@ -24,10 +24,11 @@ class Commendations(commands.Cog):
     @commendation_commands.command(name="create", description = "Create a new commendation")
     async def create(self, ctx: discord.ApplicationContext, 
                      title: discord.Option(str,required=True, description='The title of the commendation'), 
+                     comm_type: discord.Option(str,required=True, name='type', description='The type of commendation (medal or ribbon)', choices=["Medal","Ribbon"]),
                      emote: discord.Option(str,required=False, description='The emoji symbol for this commendation'), 
                      description: discord.Option(str,required=False, description='The commendation description')):
-        
-        db.create_commendation(title,description,emote)
+    
+        db.create_commendation(title,description,emote,comm_type)
         await ctx.respond(f"Created commendation: {title}")
 
     class DeleteCommendationView(discord.ui.View):
@@ -69,10 +70,45 @@ class Commendations(commands.Cog):
     
     @commendation_commands.command(name="award", description = "Award a commendation to player(s)")
     async def awardCommendation(self, ctx: discord.ApplicationContext, 
-                         title: discord.Option(str,required=True, description='The title of the commendation'), 
-                         emote: discord.Option(str,required=False, description='The emoji symbol for this commendation'), 
-                         description: discord.Option(str,required=False, description='The commendation description')):
-        pass
+                         desired_commendation: discord.Option(str, name='commendation', description='The name or ID of the commendation'), 
+                         users: discord.Option(str, name='players', description='The name, ID, or @mention of the user to award the commendation to')):
+        
+        users = [user for user in get_roblox_ids(users)]
+        commendations = db.get_all_commendations()
+
+        try:
+            if desired_commendation.isdigit():
+                commendation = [comm for comm in commendations if comm['ID'] == int(desired_commendation)][0]
+            else:
+                commendation = [comm for comm in commendations if comm['Name'].lower() == desired_commendation.lower()][0]
+        except:            
+            await ctx.respond(f"Could not find a commendation with that id or name.")
+            return
+
+        embed = discord.Embed(
+            color=discord.Colour.from_rgb(255,255,255)
+        )
+
+        for user in users:
+            try:
+                if user.get('id') == None:
+                    embed.description = f"### Could not find user {user.get('username')}!"
+                    await ctx.respond(embed=embed)
+                    continue
+
+                result = db.award_commendation(user.get('id'), commendation['ID'])
+
+                embed.set_thumbnail(url=await get_avatar_thumbnail(user.get('id')))
+
+                if result == 'Success':
+                    embed.description = f"### Awarded {commendation['Type']} {commendation['Emote']} {commendation['Name']}.\n Congratulation {user.get('username')}!"
+                    await ctx.respond(embed=embed)
+                else:
+                    embed.description = f"### {user.get('username')} already has the {commendation['Emote']} {commendation['Name']} {commendation['Type'].lower()}."
+                    await ctx.respond(embed=embed)
+
+            except Exception as e:
+                await ctx.respond(e)
 
     @commendation_commands.command(name="unaward", description = "Unaward a commendation from player(s)")
     async def unawardCommendation(self, ctx: discord.ApplicationContext, 
