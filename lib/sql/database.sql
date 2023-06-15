@@ -39,7 +39,7 @@ CREATE TABLE commendations (
 
 INSERT INTO commendations
 VALUES 
-(1, "Frostarian War Commendation - LSE War", "War commendation given to medal recipients for the LSE war", "🎖️", NULL, FROM_UNIXTIME(1612824854)),
+(1, "Frostarian War Commendation - LSE War", "War commendation given to commendation recipients for the LSE war", "🎖️", NULL, FROM_UNIXTIME(1612824854)),
 (2, "2021 Frostarian Easter Egg Hunt", "Found all the eggs during the Frostarian 2021 Egg Hunt at Grand Celeste", "🥚", NULL, FROM_UNIXTIME(1617320834)),
 (3, "Voice of the Vanguard - Snow Core War", "Hosted the most raid wins on Aurora's Dam during the Snow Core war", "❄️", NULL, FROM_UNIXTIME(1623373111)),
 (4, "Bulwark of Celeste - Snow Core War", "Hosted the most defense wins at Celeste 2 during the Snow Core wwar", "❄️", NULL, FROM_UNIXTIME(1623373123)),
@@ -90,8 +90,8 @@ VALUES
 CREATE TABLE user_commendations (
     User_ID bigint NOT NULL,
     Commendation_ID int(11) NOT NULL,
-    CONSTRAINT PK_user_medal PRIMARY KEY (User_ID, Commendation_ID),
+    CONSTRAINT PK_user_commendation PRIMARY KEY (User_ID, Commendation_ID),
     CONSTRAINT FK_user FOREIGN KEY (User_ID) REFERENCES users(User_ID),
-    CONSTRAINT FK_medal FOREIGN KEY (Commendation_ID) REFERENCES commendations(Commendation_ID)
+    CONSTRAINT FK_commendation FOREIGN KEY (Commendation_ID) REFERENCES commendations(Commendation_ID)
 );
 

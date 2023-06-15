@@ -86,7 +86,7 @@ class Profile(commands.Cog):
         commendations = db.get_user_commendations(user.get('id'))
         
         if commendations:
-            formatted_commendations = "\n".join([f"{medal['Emote']} {medal['Name']}" for medal in commendations])
+            formatted_commendations = "\n".join([f"{commendation['Emote']} {commendation['Name']}" for commendation in commendations])
         else:
             formatted_commendations = "No commendations yet!"
 

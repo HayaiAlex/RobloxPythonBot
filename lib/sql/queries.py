@@ -132,12 +132,12 @@ class DB():
             print("Error getting user's commendations")
             return []
 
-    def get_medal_info(self,id:int):
+    def get_commendation_info(self,id:int):
         try:
-            medal_query = f"""
+            commendation_query = f"""
             SELECT Name, Emote, Description, Role_ID, Created FROM commendations WHERE commendations.Commendation_ID = {id};
             """
-            medal_data = read_query(medal_query)[0]
+            commendation_data = read_query(commendation_query)[0]
             
             users_query = f"""
             SELECT users.User_ID FROM commendations JOIN user_commendations ON commendations.Commendation_ID = user_commendations.Commendation_ID JOIN users ON users.User_ID = user_commendations.User_ID WHERE commendations.Commendation_ID = {id};
@@ -146,29 +146,29 @@ class DB():
             users = [user[0] for user in users]
             
             columns = ["Name", "Emote", "Description", "Role ID", "Created"]
-            medal_data = dict(zip(columns,medal_data))
+            commendation_data = dict(zip(columns,commendation_data))
 
-            medal_data['Users'] = users
+            commendation_data['Users'] = users
             
-            return medal_data
+            return commendation_data
         except:
-            raise Exception('Could not find medal')
+            raise Exception('Could not find commendation')
         
     def get_all_commendations(self):
         try:
-            medal_query = f"""
+            commendation_query = f"""
             SELECT Commendation_ID, Name, Emote, Description, Role_ID, Created FROM commendations;
             """
-            commendations = read_query(medal_query)
+            commendations = read_query(commendation_query)
             
             columns = ["ID", "Name", "Emote", "Description", "Role ID", "Created"]
-            commendations = [dict(zip(columns,medal)) for medal in commendations]
+            commendations = [dict(zip(columns,commendation)) for commendation in commendations]
 
             return commendations
         except:
             raise Exception('Could not find any commendations')
         
-    def create_medal(self, title, description, emote, role_id='NULL'):
+    def create_commendation(self, title, description, emote, role_id='NULL'):
         try:
             query = f"""
             INSERT INTO commendations (Name,Description,Emote,Role_ID,Created)
@@ -176,16 +176,16 @@ class DB():
             """
             execute_query(query)
         except:
-            raise Exception('Could not create medal')   
+            raise Exception('Could not create commendation')   
         
-    def delete_medal(self, id):
+    def delete_commendation(self, id):
         try:
             query = f"""
             DELETE FROM commendations WHERE Commendation_ID = {id};
             """
             execute_query(query)
         except:
-            raise Exception('Could not delete medal')
+            raise Exception('Could not delete commendation')
         
     def has_user_passed_mr_vote(self, user):
         try:

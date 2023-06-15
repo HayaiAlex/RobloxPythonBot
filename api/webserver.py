@@ -71,13 +71,13 @@ class Webserver(commands.Cog):
                 return web.Response(status=404)
             
         
-        @routes.get('/medal', allow_head=False)
-        async def get_medal(request):
+        @routes.get('/commendation', allow_head=False)
+        async def get_commendation(request):
             try:
-                print(f"getting medal {request.query['id']}")
+                print(f"getting commendation {request.query['id']}")
 
-                medal_data = db.get_medal_info(request.query['id'])
-                data = json.dumps(medal_data, default=str)
+                commendation_data = db.get_commendation_info(request.query['id'])
+                data = json.dumps(commendation_data, default=str)
 
                 return web.Response(status=200,content_type="application/json", body=data)
             except:

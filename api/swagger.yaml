@@ -71,11 +71,11 @@ paths:
         404:
           description: Player not found
   
-  /medal:
+  /commendation:
     get:
       tags:
         - Medal
-      summary: Get a medal's information
+      summary: Get a commendation's information
       produces:
         - application/json
       parameters:
