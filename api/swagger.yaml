@@ -71,6 +71,28 @@ paths:
         404:
           description: Player not found
   
+  /update-user:
+    post:
+      tags:
+        - Player
+      summary: Update a player's stats
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: query
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          schema:
+            type: string
+            example: 'Updated Raids to 5'
+        404:
+          description: Something went wrong
+
   /commendation:
     get:
       tags:
@@ -140,6 +162,57 @@ paths:
         404:
           description: No commendations found
 
+  /award-commendation:
+    post:
+      tags:
+        - Commendation
+      summary: Award a commendation to a list of players
+      produces:
+        - application/json
+      parameters:
+        - name: users
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              users:
+                type: string
+                example: 'player1 player2'
+              commendation:
+                type: integer
+                format: int64
+      responses:
+        200:
+          description: OK
+        404:
+          description: Could not award commendation or could not find user
+
+  /remove-commendation:
+    delete:
+      tags:
+        - Commendation
+      summary: Remove a commendation from a list of players
+      produces:
+        - application/json
+      parameters:
+        - name: users
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              users:
+                type: string
+                example: 'player1 player2'
+              commendation:
+                type: integer
+                format: int64
+      responses:
+        200:
+          description: OK
+        404:
+          description: Could not award commendation or could not find user
 
   /award:
     post:
