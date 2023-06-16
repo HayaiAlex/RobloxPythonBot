@@ -20,6 +20,9 @@ def get_rover_data_from_roblox_id(user_id):
         return response['discordUsers'][0]
     return {}
 
+async def send_could_not_find_user_msg(self, ctx, user):
+    await ctx.respond(embed=discord.Embed(title=f"Could not find player {user}", color=discord.Colour.from_rgb(255,255,255)))
+    
 async def get_discord_user(guild, user_id):
     print('getting discord user')
     # user rover to get their discord id
@@ -113,4 +116,7 @@ class DiscordManager():
         channel = await self.bot.fetch_channel(1091380436715970561)
 
         embed = self.get_profile_embed(user)
-        await channel.send("A returning player joined the server. The bot reset their stats. Restore stats?", embed=embed, view=self.RestoreStatsView(user, event))
+        alert_embed = discord.Embed(title=f"Restore {user.get('username')} stats?",
+                                    description= f"It looks like {user.get('username')} is a returning player. The bot has reset their stats. Do you wish to keep their previous progress?", 
+                                    color=discord.Colour.from_rgb(255,255,255))
+        await channel.send(embeds=[alert_embed,embed], view=self.RestoreStatsView(user, event))

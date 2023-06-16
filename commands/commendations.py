@@ -55,7 +55,7 @@ class Commendations(commands.Cog):
         
         commendation = self.get_commendation(desired_commendation)
         if commendation == None:
-            await ctx.respond(f"Could not find commendation: {desired_commendation}")
+            await ctx.respond(embed=discord.Embed(title=f"Could not find commendation {desired_commendation}", color=discord.Colour.from_rgb(255,255,255)))
             return
         commendation = db.get_commendation_info(commendation['ID'])
         
@@ -88,8 +88,11 @@ class Commendations(commands.Cog):
                      emote: discord.Option(str,required=False, description='The emoji symbol for this commendation'), 
                      description: discord.Option(str,required=False, description='The commendation description')):
     
-        db.create_commendation(title,description,emote,comm_type)
-        await ctx.respond(f"Created commendation: {title}")
+        try:
+            db.create_commendation(title,description,emote,comm_type)
+            await ctx.respond(embed=discord.Embed(title=f"Created {comm_type.lower()} {emote} {title}", color=discord.Colour.from_rgb(255,255,255)))
+        except:
+            await ctx.respond(embed=discord.Embed(title=f"Could not create {comm_type.lower()} {emote} {title}", description="Please check your input. If this persists please message hisokachan.", color=discord.Colour.from_rgb(255,255,255)))
 
     class DeleteCommendationView(discord.ui.View):
         def __init__(self, id, commendation, embed: discord.Embed):
@@ -117,11 +120,15 @@ class Commendations(commands.Cog):
     async def delete(self, ctx: discord.ApplicationContext, 
                      id: discord.Option(int, required=True, description='Commendation ID')):
 
-        commendation = db.get_commendation_info(id)
+        try:
+            commendation = db.get_commendation_info(id)
+        except:
+            await ctx.respond(embed=discord.Embed(title=f"Could not find commendation {id}", color=discord.Colour.from_rgb(255,255,255)))
+            return
 
         embed = discord.Embed(
             title=f"Delete Commendation",
-            color=discord.Colour.from_rgb(255,0,0)
+            color=discord.Colour.from_rgb(255,255,255)
         )
         embed.add_field(name="Name",value=f"{commendation['Emote']} {commendation['Name']}")
         embed.add_field(name="Description",value=f"{commendation['Description']}")
@@ -148,7 +155,7 @@ class Commendations(commands.Cog):
       
         commendation = self.get_commendation(desired_commendation)
         if commendation == None:
-            await ctx.respond(f"Could not find a commendation with that id or name.")
+            await ctx.respond(embed=discord.Embed(title=f"Could not find commendation {desired_commendation}", color=discord.Colour.from_rgb(255,255,255)))
             return
 
         embed = discord.Embed(
@@ -175,7 +182,7 @@ class Commendations(commands.Cog):
                     await ctx.respond(embed=embed)
 
             except Exception as e:
-                await ctx.respond(e)
+                await ctx.respond(embed=discord.Embed(title="Something went wrong!", description=f"```{e}```", color=discord.Colour.from_rgb(255,255,255)))
 
     @discord.slash_command(name="commendation-unaward", description = "Unaward a commendation from player(s)")
     async def unawardCommendation(self, ctx: discord.ApplicationContext, 
@@ -187,7 +194,7 @@ class Commendations(commands.Cog):
         
         commendation = self.get_commendation(desired_commendation)
         if commendation == None:
-            await ctx.respond(f"Could not find a commendation with that id or name.")
+            await ctx.respond(embed=discord.Embed(title=f"Could not find commendation {desired_commendation}", color=discord.Colour.from_rgb(255,255,255)))
             return
         
         embed = discord.Embed(
@@ -215,7 +222,7 @@ class Commendations(commands.Cog):
                 await ctx.respond(embed=embed)
 
             except Exception as e:
-                await ctx.respond(e)
+                await ctx.respond(embed=discord.Embed(title=f"Something went wrong!", description=f"```{e}```", color=discord.Colour.from_rgb(255,255,255)))
 
 
     @discord.slash_command(name="commendation-role-assign", description = "Assign a role that will automatically be given to anyone who has this commendation")
@@ -225,7 +232,7 @@ class Commendations(commands.Cog):
         role = int(role)
         # Check if the role is valid
         if ctx.guild.get_role(role) == None:
-            await ctx.respond(f"Could not find a role with that id.")
+            await ctx.respond(embed=discord.Embed(title=f"Could not find role with id {role}", color=discord.Colour.from_rgb(255,255,255)))
             return
 
         # Check if the commendation is valid
@@ -233,7 +240,7 @@ class Commendations(commands.Cog):
             commendation_data = db.get_commendation_info(comm_id)
             previous_role = commendation_data['Role ID']
         except:
-            await ctx.respond(f"Could not find a commendation with that id.")
+            await ctx.respond(embed=discord.Embed(title=f"Could not find commendation with id {comm_id}", color=discord.Colour.from_rgb(255,255,255)))
             return
         
         # Assign the role to the commendation
@@ -253,7 +260,7 @@ class Commendations(commands.Cog):
                 print("Something went wrong")
         
         role_mention = ctx.guild.get_role(role).mention
-        await ctx.respond(f"Successfully assigned role {role_mention} to commendation **{commendation_data['Name']}**")
+        await ctx.respond(embed=discord.Embed(title=f"Successfully assigned {role_mention} to {commendation_data['Emote']} {commendation_data['Name']}", color=discord.Colour.from_rgb(255,255,255)))
 
     @discord.slash_command(name="commendation-role-remove", description = "Remove the link between a role and a commendation")
     async def removeRoleFromCommendation(self, ctx: discord.ApplicationContext, 
@@ -264,7 +271,7 @@ class Commendations(commands.Cog):
             commendation_data = db.get_commendation_info(comm_id)
             previous_role = commendation_data['Role ID']
         except:
-            await ctx.respond(f"Could not find a commendation with that id.")
+            await ctx.respond(embed=discord.Embed(title=f"Could not find commendation with id {comm_id}", color=discord.Colour.from_rgb(255,255,255)))
             return
         
         # Remove the role from the commendation
@@ -281,4 +288,4 @@ class Commendations(commands.Cog):
                 continue
 
         role_mention = ctx.guild.get_role(previous_role).mention
-        await ctx.respond(f"Successfully removed role {role_mention} from commendation **{commendation_data['Name']}**")
+        await ctx.respond(embed=discord.Embed(title=f"Successfully removed {role_mention} from {commendation_data['Emote']} {commendation_data['Name']}", color=discord.Colour.from_rgb(255,255,255)))

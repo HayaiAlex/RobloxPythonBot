@@ -247,7 +247,11 @@ class JoinManager(commands.Cog):
                 rover_member = get_rover_data_from_roblox_id(self.user.get('userId'))
                 member = interaction.guild.get_member(rover_member['user']['id'])
                 dm_channel = await self.bot.create_dm(member)
-                await dm_channel.send(f"Your request to join The Grand Union of Frostaria has been declined. You can message a ")
+                await dm_channel.send(embed=discord.Embed(
+                    title="Your join request was declined",
+                    description=f"Your request to join The Grand Union of Frostaria was declined. If you believe this was a mistake, please contact an Admiral for more information.",
+                    color=discord.Color.from_rgb(255,255,255)
+                ))
             except:
                 pass
 
@@ -269,7 +273,10 @@ class JoinManager(commands.Cog):
                 rover_member = get_rover_data_from_roblox_id(self.user.get('userId'))
                 member = interaction.guild.get_member(rover_member['user']['id'])
                 dm_channel = await self.bot.create_dm(member)
-                await dm_channel.send(f"Congratulations! Your request to join The Grand Union of Frostaria has been accepted!")
+                await dm_channel.send(embed=discord.Embed(
+                    title="Congratulations!",
+                    description=f"Your request to join The Grand Union of Frostaria was accepted. Welcome to the group!",
+                ))
             except:
                 pass
 

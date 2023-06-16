@@ -1,6 +1,7 @@
 import datetime
 import os, discord, json, robloxpy
 from discord.ext import commands
+from lib.discord_functions import send_could_not_find_user_msg
 from lib.roblox.roblox_functions import get_avatar_thumbnail, get_roblox_ids, get_role_in_group, has_uniform
 from lib.progression import get_top_rank
 from lib.sql.queries import DB
@@ -24,10 +25,15 @@ class Progress(commands.Cog):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
+
+        if user.get('id') == None:
+            send_could_not_find_user_msg(ctx, user)
+            return
+        
         id = user.get('id')
         profile = db.get_data_from_id(id)
         embed = await self.get_progress_embed(user, top_rank=get_top_rank(profile))
-        await ctx.respond("", embed=embed)
+        await ctx.respond(embed=embed)
         
     async def get_progress_embed(self, user, top_rank):
         roles = get_role_in_group(user['id'], GROUP_ID)

@@ -15,6 +15,12 @@ def get_top_rank(profile):
         
         return False
 
+    def check_rank_5_5(profile):
+        if profile['Raids'] + profile['Defenses'] >= 12 and profile['Raids'] > 5:
+            return True
+        
+        return False
+
     def check_rank_5(profile):
         if profile['Raids'] + profile['Defenses'] >= 8 and profile['Raids'] > 3 and \
             profile['Prism_Trainings'] + profile['Defense_Trainings'] > 18 and \
@@ -47,14 +53,14 @@ def get_top_rank(profile):
         return False
 
 
-    rank_requirements = {'2':check_rank_2, '3':check_rank_3, '4':check_rank_4, '5':check_rank_5, '6':check_rank_6}
+    rank_requirements = {'2':check_rank_2, '3':check_rank_3, '4':check_rank_4, '5':check_rank_5, '5.5':check_rank_5_5, '6':check_rank_6}
     current_rank = 1
     
     for rank, passes_rank in rank_requirements.items():
         if not passes_rank(profile):
             return current_rank
         else:
-            current_rank = int(rank)
+            current_rank = float(rank)
     return current_rank
 
 def check_for_promotions(users):
@@ -70,7 +76,7 @@ def check_for_promotions(users):
         
         try:
             user_profile = db.get_data_from_id(user)
-            deserved_rank = get_top_rank(user_profile)
+            deserved_rank = int(get_top_rank(user_profile))
         except Exception as err:
             print(err)
             deserved_rank = 0

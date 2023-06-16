@@ -42,7 +42,7 @@ class Webserver(commands.Cog):
                 profile = db.get_data_from_id(request.query['id'])
                 commendations = db.get_user_commendations(request.query['id'])
                 profile['Commendations'] = commendations
-                data = json.dumps(profile)
+                data = json.dumps(profile, default=str)
 
                 return web.Response(status=200,content_type="application/json", body=data)
             except:
@@ -94,6 +94,60 @@ class Webserver(commands.Cog):
                 return web.Response(status=200,content_type="application/json", body=data)
             except:
                 return web.Response(status=404)
+            
+        @routes.post('/award-commendation')
+        async def award_commendation(request):
+            if request.headers.get('authorization') != Auth:
+                return web.Response(status=401)
+            
+            data = await request.json()
+            users = data['users']
+            commendation = data['commendation']
+
+            users = get_roblox_ids(users)
+            try:
+                for user in users:
+                    db.award_commendation(user.get('id'),commendation)
+                return web.Response(status=200)
+            except:
+                return web.Response(status=404)
+            
+        @routes.delete('/remove-commendation')
+        async def remove_commendation(request):
+            if request.headers.get('authorization') != Auth:
+                return web.Response(status=401)
+            
+            data = await request.json()
+            users = data['users']
+            commendation = data['commendation']
+            try:
+                quantity = data['quantity']
+            except:
+                quantity = 1
+
+            users = get_roblox_ids(users)
+            success = []
+            failed = []
+            for user in users:
+                try:
+                    db.unaward_commendation(user.get('id'),commendation,quantity)
+                    success.append(user.get('username'))
+                except:
+                    failed.append(user.get('username'))
+
+            if len(success) == 0:
+                return web.Response(status=404)
+            
+            data = {
+                "success":success,
+                "failed":failed
+            }
+
+            data = json.dumps(data)
+            return web.Response(status=200,content_type="application/json", body=data)
+        
+        
+        
 
         @routes.post('/award')
         async def award(request):
@@ -105,7 +159,7 @@ class Webserver(commands.Cog):
             event = data['event']
             print("award hit")
 
-            users = [user for user in get_roblox_ids(users)]
+            users = get_roblox_ids(users)
             print(users)
             try:
                 awarded = db.award(event,users)

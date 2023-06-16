@@ -2,6 +2,7 @@ import datetime
 import os, discord, json, robloxpy
 from discord.ext import commands
 from lib.roblox.roblox_functions import get_avatar_thumbnail, get_roblox_ids, get_role_in_group
+from lib.discord_functions import send_could_not_find_user_msg
 from lib.sql.queries import DB
 
 with open('config.json', 'r') as file:
@@ -23,6 +24,10 @@ class Profile(commands.Cog):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
+
+        if user.get('id') == None:
+            send_could_not_find_user_msg(ctx, user)
+            return
         
         embed = await self.get_profile_embed(user)
         await ctx.respond("", embed=embed)
@@ -70,7 +75,6 @@ class Profile(commands.Cog):
             embed.add_field(name=event_field_name, value=event_fields)
     
         aim_trainer_kills = user_data.get('Solo_Aim_Trainer_Kills')
-        print(aim_trainer_kills)
         embed.add_field(name="Aim Trainer", value=f"Solo: {aim_trainer_kills}")
 
         # Spar Stats

@@ -1,7 +1,7 @@
 import datetime
 import os, discord, json
 from discord.ext import commands
-from lib.discord_functions import DiscordManager
+from lib.discord_functions import DiscordManager, send_could_not_find_user_msg
 from lib.sql.queries import DB
 from lib.roblox.roblox_functions import get_ordered_datastore_stat, get_roblox_ids
 from lib.progression import check_for_promotions
@@ -28,7 +28,16 @@ class Update(commands.Cog):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
-        await ctx.respond(f"Checking {user.get('username')}...")
+
+        if user.get('id') == None:
+            send_could_not_find_user_msg(ctx, user)
+            return
+
+        checking_embed = discord.Embed(
+            title=f"Checking {user.get('username')}'s roles...",
+            color=discord.Colour.from_rgb(255,255,255),
+        )
+        await ctx.respond(embed=checking_embed)
         
         # update their rank
         check_for_promotions([user.get('id')])
@@ -36,7 +45,11 @@ class Update(commands.Cog):
         await self.discord_manager.update_roles(user)
         
         # edit preious sent message
-        await ctx.interaction.edit_original_response(content=f"Updated {user.get('username')}'s roles.")
+        finished_embed = discord.Embed(
+            title=f"Finished updating {user.get('username')}'s roles!",
+            color=discord.Colour.from_rgb(255,255,255),
+        )
+        await ctx.interaction.edit_original_response(embed=finished_embed)
         
 
     @discord.slash_command(name="update-stats", description = "Updates all users' stats")
@@ -45,7 +58,16 @@ class Update(commands.Cog):
         if user == None:
             user = ctx.user.mention
         user = get_roblox_ids(user)[0]
-        await ctx.respond(f"Updating {user.get('username')}...")
+        
+        if user.get('id') == None:
+            send_could_not_find_user_msg(ctx, user)
+            return
+
+        checking_embed = discord.Embed(
+            title=f"Updating {user.get('username')}'s stats...",
+            color=discord.Colour.from_rgb(255,255,255),
+        )
+        await ctx.respond(embed=checking_embed)
 
         # update their stats
         prism_id = 4371347484
@@ -62,4 +84,9 @@ class Update(commands.Cog):
 
 
         # edit preious sent message on complete
-        await ctx.interaction.edit_original_response(content=f"Updated {user.get('username')}'s stats.", embed=await Profile.get_profile_embed(user))
+        finished_embed = discord.Embed(
+            title=f"Finished updating {user.get('username')}'s stats!",
+            color=discord.Colour.from_rgb(255,255,255),
+        )
+        profile_embed = await Profile.get_profile_embed(user)
+        await ctx.interaction.edit_original_response(embeds=[finished_embed, profile_embed])
