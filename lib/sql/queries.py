@@ -286,3 +286,19 @@ class DB():
         except:
             raise Exception('Could not find user')
         
+    def get_province(self, name):
+        try:
+            # lower and capitalise name
+            name = name.lower().capitalize()
+            query = f"""
+            SELECT Province_ID, Name, Team_ID, Prestige, Leader_ID, Description, Image_Url FROM provinces WHERE Name = '{name}';
+            """
+            province = read_query(query)
+            province = province[0]
+
+            columns = ["ID", "Name", "Team ID", "Prestige", "Leader ID", "Description", "Image Url"]
+            province = dict(zip(columns,province))
+
+            return province
+        except:
+            raise Exception('Could not find province')

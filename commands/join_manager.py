@@ -41,6 +41,7 @@ class JoinManager(commands.Cog):
                 # check if join request is already in discord channel
                 # if not, create join request view
                 if await self.is_join_request_in_channel(user):
+                    print(f"Found {user.get('username')}")
                     continue
                 else:
                     await self.create_join_request_view(user)

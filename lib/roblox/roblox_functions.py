@@ -110,7 +110,7 @@ def get_recent_badges(user_id, limit=100):
     except:
         return []
 
-def get_role_in_group(user_id, group_id):
+def get_role_in_group(user_id, group_id=GROUP_ID):
     url = f"https://groups.roblox.com/v2/users/{user_id}/groups/roles"
     try:
         request = requests.get(url)

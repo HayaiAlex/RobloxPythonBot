@@ -15,6 +15,7 @@ bot = commands.Bot(intents=intents)
 bot.load_extension('commands.progression')
 bot.load_extension('commands.join_manager')
 bot.load_extension('commands.commendations')
+bot.load_extension('commands.provinces')
 bot.load_extension('api.webserver')
 
 bot.run(TOKEN)
