@@ -5,6 +5,8 @@ from discord.ext import commands
 
 GROUP_ID = os.getenv('GROUP_ID')
 COOKIE = os.getenv('COOKIE')
+with open('config.json', 'r') as file:
+    config = json.load(file)
 
 def setup(bot):
     bot.add_cog(RoleManager(bot))
@@ -17,8 +19,6 @@ class RoleManager(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
 
-        with open('config.json', 'r') as file:
-            config = json.load(file)
         role_channel_id = config.get('role_channel_id')
         self.role_channel = self.bot.get_channel(role_channel_id)
 
@@ -99,10 +99,10 @@ class RoleManager(commands.Cog):
 
         # get role
         roles = {
-            '👪': 1124438097401221140,
-            '🎲': 1124438192821649480,
-            '🌳': 1124438054069866606,
-            '🔨': 1124438126841036961
+            '👪': config.get('community_announcements_role_id'),
+            '🎲': config.get('game_nights_role_id'),
+            '🌳': config.get('minecraft_role_id'),
+            '🔨': config.get('dev_updates_role_id'),
         }
 
         # get user
@@ -150,11 +150,11 @@ class RoleManager(commands.Cog):
 
         async def timezone(self, select: discord.ui.Select, interaction: discord.Interaction):
             roles = {
-                'pst': 1124440425609056387,
-                'mst': 1124440445796237342,
-                'cst': 1124440469921865798,
-                'est': 1124440480529272994,
-                'gmt': 1124440491681927269
+                'pst': config.get('pst_role_id'),
+                'mst': config.get('mst_role_id'),
+                'cst': config.get('cst_role_id'),
+                'est': config.get('est_role_id'),
+                'gmt': config.get('gmt_role_id'),
             }
             # reset roles
             for role_id in roles.values():
