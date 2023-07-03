@@ -1,4 +1,5 @@
 import datetime, robloxpy, requests, os, discord
+import json
 from gsheets import Sheets
 from discord.ext import tasks, commands
 from lib.discord_functions import get_rover_data_from_roblox_id
@@ -6,6 +7,8 @@ from lib.roblox.roblox_functions import accept_join_request, decline_join_reques
 
 GROUP_ID = os.getenv('GROUP_ID')
 COOKIE = os.getenv('COOKIE')
+with open('config.json', 'r') as file:
+    config = json.load(file)
 
 def setup(bot):
     bot.add_cog(JoinManager(bot))
@@ -44,6 +47,7 @@ class JoinManager(commands.Cog):
                     print(f"Found {user.get('username')}")
                     continue
                 else:
+                    print("Creating join request view")
                     await self.create_join_request_view(user)
                     
         except:
@@ -56,9 +60,12 @@ class JoinManager(commands.Cog):
     async def is_join_request_in_channel(self, user):
         username = user.get('username')
         print(f"Checking if {username} is in channel")
-        channel = self.bot.get_channel(1046506345618210918)
+        channel = self.bot.get_channel(config['join_request_channel'])
+        print(channel)
         messages:list[discord.Message] = await channel.history(limit=50).flatten()
+        print(messages)
         for message in messages:
+            print(message)
             if message.embeds and message.embeds[0].title == f'{username} has requested to join the group':
                 if message.embeds[0].footer.text.find(self.format_request_time(user.get('requested_at'))) == -1:
                     return False
@@ -67,10 +74,9 @@ class JoinManager(commands.Cog):
         return False
 
     async def create_join_request_view(self, user):
-        print("Creating join request view")
         view = self.JoinRequestView(self.bot, user, self.get_home_embed, self.get_groups_embed, self.get_badges_embed)
-        channel = self.bot.get_channel(1046506345618210918)
-
+        channel = self.bot.get_channel(config['join_request_channel'])
+        print(channel)
 
         user['banned_groups'] = self.get_users_banned_groups(user)
         user['rap'] = robloxpy.User.External.GetRAP(user.get('userId'))
@@ -148,16 +154,18 @@ class JoinManager(commands.Cog):
             color=discord.Color.blurple()
         )
 
-        if len(user.get('groups')) > 1:
+        if len(user.get('groups')) > 0:
             description += "**Groups**\n"
         else:
             description += "**This user does not belong to any groups**\n"
         for group in user.get('groups'):
             description += f"**{group['group']['name']}**: {group['role']['name']}, Rank {group['role']['rank']}"
             if group['role']['rank'] == 255:
-                icon = "<:HisokaSeal:1118224760636190812>\n"
-            elif group['role']['rank'] > 2:
-                icon = "<:AezijiSeal:1118224784598241380>\n"
+                icon = "<:goldverify:1125557533550063646>\n"
+            elif group['role']['rank'] > 10:
+                icon = "<:blueverify:1125557536267960361>\n"
+            elif group['role']['rank'] > 1:
+                icon = "<:greyverify:1125557537958273065>\n"
             else:
                 icon = "\n"
             description += icon
