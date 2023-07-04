@@ -78,6 +78,12 @@ class JoinManager(commands.Cog):
         user['num_followers'] = robloxpy.User.Friends.External.GetFollowerCount(user.get('userId'))
         user['creation_date'] = robloxpy.User.External.CreationDate(user.get('userId'), 1)
         user['previous_usernames'] = robloxpy.User.External.UsernameHistory(user.get('userId'))
+        
+        day, month, year = user['creation_date'].split('/')
+        user['age'] = datetime.datetime.now() - datetime.datetime(int(year), int(month), int(day))
+        # get years, mpnths, days from age
+        user['age'] = f"{user['age'].days // 365} years, {(user['age'].days % 365) // 30} months, {user['age'].days % 30} days"
+
         print(user)
         embed = await self.get_home_embed(user)
         await channel.send(embed=embed, view=view)
@@ -115,6 +121,7 @@ class JoinManager(commands.Cog):
         **Followers:** {user.get('num_followers')}
         **RAP:** R$ {user.get('rap')}
         **Created:** {user.get('creation_date')}
+        **Age:** {user.get('age')}
         **Previous Usernames:** {', '.join(user.get('previous_usernames'))}
         """
 
