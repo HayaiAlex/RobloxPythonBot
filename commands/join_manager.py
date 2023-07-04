@@ -95,7 +95,7 @@ class JoinManager(commands.Cog):
     def format_request_time(self, time):
         return datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f%z').strftime('%m/%d/%Y at %I:%M %p')
     
-    async def get_home_embed(self, user):
+    async def get_home_embed(self, user, embed_color=discord.Color.from_rgb(255,255,255)):
         description = ''
 
         banned_groups = user.get('banned_groups')
@@ -110,7 +110,7 @@ class JoinManager(commands.Cog):
             title=f'{user.get("username")} has requested to join the group',
             url=f"https://www.roblox.com/users/{user.get('userId')}/profile",
             description=description,
-            color=discord.Color.blurple()
+            color=embed_color
         )
 
         if not user.get('previous_usernames'):
@@ -133,7 +133,7 @@ class JoinManager(commands.Cog):
         embed.set_footer(text=f"Requested to join GUF on {self.format_request_time(user.get('requested_at'))}")
         return embed
     
-    async def get_groups_embed(self, user):
+    async def get_groups_embed(self, user, embed_color=discord.Color.from_rgb(255,255,255)):
 
         if not user.get('groups'):
             user['groups'] = get_group_roles(user.get('userId'))
@@ -152,7 +152,7 @@ class JoinManager(commands.Cog):
         embed = discord.Embed(
             title=f'{user.get("username")} has requested to join the group',
             url=f"https://www.roblox.com/users/{user.get('userId')}/profile",
-            color=discord.Color.blurple()
+            color=embed_color
         )
 
         if len(user.get('groups')) > 1:
@@ -176,7 +176,7 @@ class JoinManager(commands.Cog):
         embed.set_footer(text=f"Requested to join GUF on {self.format_request_time(user.get('requested_at'))}")
         return embed
     
-    async def get_badges_embed(self, user):
+    async def get_badges_embed(self, user, embed_color=discord.Color.from_rgb(255,255,255)):
 
         if not user.get('badges'):
             user['badges'] = get_recent_badges(user.get('userId'))
@@ -194,7 +194,7 @@ class JoinManager(commands.Cog):
         embed = discord.Embed(
             title=f'{user.get("username")} has requested to join the group',
             url=f"https://www.roblox.com/users/{user.get('userId')}/profile",
-            color=discord.Color.blurple()
+            color=embed_color
         )
 
         description += f"**Owned Badges: {'100+' if len(user.get('badges'))==100 else len(user.get('badges'))}**\n"
@@ -219,31 +219,33 @@ class JoinManager(commands.Cog):
             self.get_groups_embed = get_groups_embed
             self.get_badges_embed = get_badges_embed
             self.current_embed = None
+            self.border_colour = discord.Color.from_rgb(255,255,255)
 
-        @discord.ui.button(emoji="🪪", row=0, style=discord.ButtonStyle.blurple) 
+        @discord.ui.button(emoji="🪪", row=0, style=discord.ButtonStyle.grey) 
         async def show_home(self, button:discord.ui.Button, interaction:discord.Interaction):
-            home_embed = await self.get_home_embed(self.user)
-            self.current_embed = home_embed
+            self.current_embed = self.get_home_embed
+            home_embed = await self.get_home_embed(self.user, self.border_colour)
             await interaction.message.edit(embed=home_embed, view=self)
             await interaction.response.defer()
 
-        @discord.ui.button(emoji="🌐", row=0, style=discord.ButtonStyle.blurple) 
+        @discord.ui.button(emoji="🌐", row=0, style=discord.ButtonStyle.grey) 
         async def show_groups(self, button, interaction):
-            group_embed = await self.get_groups_embed(self.user)
-            self.current_embed = group_embed
+            self.current_embed = self.get_groups_embed
+            group_embed = await self.get_groups_embed(self.user, self.border_colour)
             await interaction.message.edit(embed=group_embed, view=self)
             await interaction.response.defer()
 
-        @discord.ui.button(emoji="🔰", row=0, style=discord.ButtonStyle.blurple) 
+        @discord.ui.button(emoji="🔰", row=0, style=discord.ButtonStyle.grey) 
         async def show_badges(self, button, interaction):
-            badges_embed = await self.get_badges_embed(self.user)
-            self.current_embed = badges_embed
-            await interaction.message.edit(embed=badges_embed, view=self)
+            self.current_embed = self.get_badges_embed
+            badge_embed = await self.get_badges_embed(self.user, self.border_colour)
+            await interaction.message.edit(embed=badge_embed, view=self)
             await interaction.response.defer()
             pass
 
         @discord.ui.button(label="Decline", row=1, style=discord.ButtonStyle.danger, emoji="👎") 
         async def decline_button(self, button:discord.ui.Button, interaction:discord.Interaction):
+            self.border_colour = discord.Color.from_rgb(255,40,40)
             self.remove_item(button)
             self.remove_item([i for i in self.children if i.label == "Accept"][0])
 
@@ -264,16 +266,19 @@ class JoinManager(commands.Cog):
                 pass
 
             if not self.current_embed:
-                self.current_embed = await self.get_home_embed(self.user)
-            await interaction.message.edit(embed=self.current_embed, view=self)
+                updated_embed = await self.get_home_embed(self.user, self.border_colour)
+            else:
+                updated_embed = self.current_embed(self.user, self.border_colour)
+            await interaction.message.edit(embed=updated_embed, view=self)
             await interaction.response.defer()
 
-        @discord.ui.button(label="Accept", row=1, style=discord.ButtonStyle.blurple, emoji="👍") 
+        @discord.ui.button(label="Accept", row=1, style=discord.ButtonStyle.green, emoji="👍") 
         async def accept_button(self, button, interaction:discord.Interaction):
+            self.border_colour = discord.Color.from_rgb(40,255,40)
             self.remove_item(button)
             self.remove_item([i for i in self.children if i.label == "Decline"][0])
 
-            self.add_item(discord.ui.Button(label=f"{interaction.user.display_name} accepted {self.user.get('username')}", row=1, style=discord.ButtonStyle.blurple, emoji="👍", disabled=True))
+            self.add_item(discord.ui.Button(label=f"{interaction.user.display_name} accepted {self.user.get('username')}", row=1, style=discord.ButtonStyle.green, emoji="👍", disabled=True))
 
             accept_join_request(self.user.get('userId'))
 
@@ -289,8 +294,10 @@ class JoinManager(commands.Cog):
                 pass
 
             if not self.current_embed:
-                self.current_embed = await self.get_home_embed(self.user)
-            await interaction.message.edit(embed=self.current_embed, view=self)
+                updated_embed = await self.get_home_embed(self.user, self.border_colour)
+            else:
+                updated_embed = self.current_embed(self.user, self.border_colour)
+            await interaction.message.edit(embed=updated_embed, view=self)
             await interaction.response.defer()
 
 
