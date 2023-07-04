@@ -160,7 +160,7 @@ class JoinManager(commands.Cog):
         else:
             description += "**This user does not belong to any groups**\n"
         for group in user.get('groups'):
-            description += f"**{group['group']['name']}**: {group['role']['name']}, Rank {group['role']['rank']}"
+            description += f"**[{group['group']['name']}](https://www.roblox.com/groups/{group['group']['id']})**: {group['role']['name']}, Rank {group['role']['rank']}"
             if group['role']['rank'] == 255:
                 icon = "<:HisokaSeal:1118224760636190812>\n"
             elif group['role']['rank'] > 2:
@@ -201,7 +201,7 @@ class JoinManager(commands.Cog):
         if len(user.get('badges')) > 1:
             description += "\n**Recent Badges**\n"
         for badge in user.get('badges')[:15]:
-            description += f"{badge.get('name')}\n"
+            description += f"[{badge.get('name')}](https://www.roblox.com/games/{badge.get('awarder').get('id')})\n"
 
         embed.description = description
         thumbnail = await get_avatar_thumbnail(user.get("userId"),"full")
