@@ -256,9 +256,17 @@ class JoinManager(commands.Cog):
             self.remove_item(button)
             self.remove_item([i for i in self.children if i.label == "Accept"][0])
 
-            self.add_item(discord.ui.Button(label=f"{interaction.user.display_name} declined {self.user.get('username')}", row=1, style=discord.ButtonStyle.danger, emoji="👎", disabled=True))
+            result = decline_join_request(self.user.get('userId'))
+            if result:
+                label = f"{interaction.user.display_name} declined {self.user.get('username')}"
+                style = discord.ButtonStyle.danger
+                emoji = "👎"
+            else:
+                label = f"This join request has already been handled"
+                style = discord.ButtonStyle.grey
+                emoji = "📝"
 
-            decline_join_request(self.user.get('userId'))
+            self.add_item(discord.ui.Button(label=label, row=1, style=style, emoji=emoji, disabled=True))
 
             try:
                 rover_member = get_rover_data_from_roblox_id(self.user.get('userId'))
@@ -285,9 +293,17 @@ class JoinManager(commands.Cog):
             self.remove_item(button)
             self.remove_item([i for i in self.children if i.label == "Decline"][0])
 
-            self.add_item(discord.ui.Button(label=f"{interaction.user.display_name} accepted {self.user.get('username')}", row=1, style=discord.ButtonStyle.green, emoji="👍", disabled=True))
+            result = accept_join_request(self.user.get('userId'))
+            if result:
+                label = f"{interaction.user.display_name} accepted {self.user.get('username')}"
+                style = discord.ButtonStyle.green
+                emoji = "👍"
+            else:
+                label = f"This join request has already been handled"
+                style = discord.ButtonStyle.grey
+                emoji = "📝"
 
-            accept_join_request(self.user.get('userId'))
+            self.add_item(discord.ui.Button(label=label, row=1, style=style, emoji=emoji, disabled=True))
 
             try:
                 rover_member = get_rover_data_from_roblox_id(self.user.get('userId'))
