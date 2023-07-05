@@ -73,6 +73,7 @@ class JoinManager(commands.Cog):
 
 
         user['banned_groups'] = self.get_users_banned_groups(user)
+        user['blacklisted'] = self.get_blacklist_status(user)
         user['rap'] = robloxpy.User.External.GetRAP(user.get('userId'))
         user['num_friends'] = robloxpy.User.Friends.External.GetCount(user.get('userId'))
         user['num_followers'] = robloxpy.User.Friends.External.GetFollowerCount(user.get('userId'))
@@ -106,6 +107,12 @@ class JoinManager(commands.Cog):
             else:
                 description += f"-Banned Group: {banned_groups[0]}\n```\n"
 
+        if user.get('blacklisted') in ['blacklisted', 'suspended']:
+            description += f"```diff\n-WARNING: This user is {user.get('blacklisted')}!\n-Check the [Justicars Database](https://docs.google.com/spreadsheets/d/1OC2tjU_TjYJMAriA2UxG9vhm01Ifv8ED_KYg6BykYQo/edit#gid=1547091865) for their record.\n```\n"
+
+        if user.get('blacklisted') == 'ccr':
+            description += f"```diff\n-WARNING: This user is a potential cheater!\n```\n**Check their CCR record [here](https://ccr.catgang.ru/check.php?uid={user.get('userId')}).**\n"
+
         embed = discord.Embed(
             title=f'{user.get("username")} has requested to join the group',
             url=f"https://www.roblox.com/users/{user.get('userId')}/profile",
@@ -129,7 +136,7 @@ class JoinManager(commands.Cog):
         
         thumbnail = await get_avatar_thumbnail(user.get("userId"),"full")
         embed.set_image(url=thumbnail)
-        embed.set_author(name="Ventis Group Datacenter", icon_url="https://i.imgur.com/YT9EJty.png")
+        embed.set_author(name="Office of Immigration", icon_url="https://i.imgur.com/ARh2iVP.png")
         embed.set_footer(text=f"Requested to join GUF on {self.format_request_time(user.get('requested_at'))}")
         return embed
     
@@ -172,7 +179,7 @@ class JoinManager(commands.Cog):
         embed.description = description
         thumbnail = await get_avatar_thumbnail(user.get("userId"),"full")
         embed.set_image(url=thumbnail)
-        embed.set_author(name="Ventis Group Datacenter", icon_url="https://i.imgur.com/YT9EJty.png")
+        embed.set_author(name="Office of Immigration", icon_url="https://i.imgur.com/ARh2iVP.png")
         embed.set_footer(text=f"Requested to join GUF on {self.format_request_time(user.get('requested_at'))}")
         return embed
     
@@ -206,7 +213,7 @@ class JoinManager(commands.Cog):
         embed.description = description
         thumbnail = await get_avatar_thumbnail(user.get("userId"),"full")
         embed.set_image(url=thumbnail)
-        embed.set_author(name="Ventis Group Datacenter", icon_url="https://i.imgur.com/YT9EJty.png")
+        embed.set_author(name="Office of Immigration", icon_url="https://i.imgur.com/ARh2iVP.png")
         embed.set_footer(text=f"Requested to join GUF on {self.format_request_time(user.get('requested_at'))}")
         return embed
     
@@ -315,3 +322,32 @@ class JoinManager(commands.Cog):
             if group.get('group').get('id') in banned_group_ids:
                 banned_groups.append(group.get('group').get('name'))
         return banned_groups
+
+    def get_blacklist_status(self, user):
+        user_id = user.get('userId')
+        
+        # Check if user is blacklisted in the database
+        sheets = Sheets.from_files('./client_secrets.json', './storage.json')
+        sheet = sheets['1OC2tjU_TjYJMAriA2UxG9vhm01Ifv8ED_KYg6BykYQo']
+        blacklisted_users = sheet[1837621386]['C6':'C200']
+        print(f"Blacklisted users: {blacklisted_users}")
+        suspended_users = sheet[0]['C14':'C200']
+        print(f"Suspended users: {suspended_users}")
+
+        if user_id in [blacklisted_users]:
+            return 'blacklisted'
+        elif user_id in [suspended_users]:
+            return 'suspended'
+        
+        # Check if user has a CCR record
+        url = f"https://ccr.catgang.ru/check.php?uid={user_id}&format=json"
+        request = requests.get(url)
+        print("request",request)
+        response = request.json()
+        print("response",response)
+
+        if response.get('accounts'):
+            return 'ccr'
+        else:
+            return None
+        
