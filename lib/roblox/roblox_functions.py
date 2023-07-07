@@ -150,7 +150,7 @@ def accept_join_request(user_id, x_csrf_token=None, attempts=0):
         if request.status_code == 200:
             return True
         elif request.status_code == 403 and attempts < 3:
-            accept_join_request(user_id, request.headers['x-csrf-token'], attempts+1)
+            return accept_join_request(user_id, request.headers['x-csrf-token'], attempts+1)
         else:
             return False
     except Exception as e:
@@ -167,7 +167,7 @@ def decline_join_request(user_id, x_csrf_token=None, attempts=0):
         if request.status_code == 200:
             return True
         elif request.status_code == 403 and attempts < 3:
-            decline_join_request(user_id, request.headers['x-csrf-token'], attempts+1)
+            return decline_join_request(user_id, request.headers['x-csrf-token'], attempts+1)
         else:
             return False
     except Exception as e:
