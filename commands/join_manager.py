@@ -70,7 +70,6 @@ class JoinManager(commands.Cog):
         print(f"Checking if {user.username} is in channel")
         channel = self.bot.get_channel(1046506345618210918)
         messages:list[discord.Message] = await channel.history(limit=50).flatten()
-        print(messages)
         for message in messages:
             if message.embeds and message.embeds[0].title == f'{user.username} has requested to join the group':
                 if message.embeds[0].footer.text.find(self.format_request_time(user.requested_at)) == -1:
@@ -93,7 +92,6 @@ class JoinManager(commands.Cog):
         user.previous_usernames = robloxpy.User.External.UsernameHistory(user.id)
         month, day, year = user.creation_date.split('/')
         user.age = datetime.datetime.now() - datetime.datetime(int(year), int(month), int(day))
-        # get years, mpnths, days from age
         user.age = f"{user.age.days // 365} years, {(user.age.days % 365) // 30} months, {user.age.days % 30} days"
 
         embed = await self.get_home_embed(user)
