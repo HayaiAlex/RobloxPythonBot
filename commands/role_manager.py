@@ -82,10 +82,10 @@ class RoleManager(commands.Cog):
 
         # get role
         roles = {
-            '👪': 1124438097401221140,
-            '🎲': 1124438192821649480,
-            '🌳': 1124438054069866606,
-            '🔨': 1124438126841036961
+            '👪': config.get('community_announcements_role_id'),
+            '🎲': config.get('game_nights_role_id'),
+            '🌳': config.get('minecraft_role_id'),
+            '🔨': config.get('dev_updates_role_id'),
         }
         role = payload.member.guild.get_role(roles[payload.emoji.name])
         await payload.member.add_roles(role)
@@ -165,5 +165,6 @@ class RoleManager(commands.Cog):
             role = interaction.guild.get_role(roles[select.values[0]])
             await interaction.user.add_roles(role)
 
-            await interaction.response.defer()
+            # await interaction.response.defer()
+            await interaction.response.send_message(f"Your timezone has been set to {select.values[0]}", ephemeral=True)
 

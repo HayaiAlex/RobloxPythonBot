@@ -1,4 +1,5 @@
 import datetime, robloxpy, requests, os, discord
+import json
 from gsheets import Sheets
 from discord.ext import tasks, commands
 from discord.ext.pages import Paginator, Page
@@ -7,6 +8,8 @@ from lib.roblox.roblox_functions import accept_join_request, decline_join_reques
 
 GROUP_ID = os.getenv('GROUP_ID')
 COOKIE = os.getenv('COOKIE')
+with open('config.json', 'r') as file:
+    config = json.load(file)
 
 def setup(bot):
     bot.add_cog(JoinManager(bot))
@@ -53,6 +56,7 @@ class JoinManager(commands.Cog):
                     print(f"Found {user.username}")
                     continue
                 else:
+                    print("Creating join request view")
                     await self.create_join_request_view(user)
                     
         except:
@@ -66,6 +70,7 @@ class JoinManager(commands.Cog):
         print(f"Checking if {user.username} is in channel")
         channel = self.bot.get_channel(1046506345618210918)
         messages:list[discord.Message] = await channel.history(limit=50).flatten()
+        print(messages)
         for message in messages:
             if message.embeds and message.embeds[0].title == f'{user.username} has requested to join the group':
                 if message.embeds[0].footer.text.find(self.format_request_time(user.requested_at)) == -1:
@@ -179,7 +184,9 @@ class JoinManager(commands.Cog):
             description += f"**[{group['group']['name']}](https://www.roblox.com/groups/{group['group']['id']})**: {group['role']['name']}, Rank {group['role']['rank']}"
             if group['role']['rank'] == 255:
                 icon = "<:HisokaSeal:1118224760636190812>\n"
-            elif group['role']['rank'] > 2:
+            elif group['role']['rank'] > 10:
+                icon = "<:HisokaSeal:1118224760636190812>\n"
+            elif group['role']['rank'] > 1:
                 icon = "<:AezijiSeal:1118224784598241380>\n"
             else:
                 icon = "\n"
