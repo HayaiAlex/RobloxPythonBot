@@ -68,7 +68,7 @@ class JoinManager(commands.Cog):
 
     async def is_join_request_in_channel(self, user):
         print(f"Checking if {user.username} is in channel")
-        channel = self.bot.get_channel(1046506345618210918)
+        channel = self.bot.get_channel(1125545410015006761)
         messages:list[discord.Message] = await channel.history(limit=50).flatten()
         for message in messages:
             if message.embeds and message.embeds[0].title == f'{user.username} has requested to join the group':
@@ -81,7 +81,7 @@ class JoinManager(commands.Cog):
     async def create_join_request_view(self, user):
         print(f"Creating join request view for {user.username}")
         view = self.JoinRequestView(self.bot, user, [self.get_home_embed, self.get_groups_embed, self.get_badges_embed])
-        channel = self.bot.get_channel(1046506345618210918)
+        channel = self.bot.get_channel(1125545410015006761)
 
         user.banned_groups = self.get_users_banned_groups(user)
         user.blacklisted = self.get_blacklist_status(user)
@@ -181,11 +181,11 @@ class JoinManager(commands.Cog):
         for group in groups:
             description += f"**[{group['group']['name']}](https://www.roblox.com/groups/{group['group']['id']})**: {group['role']['name']}, Rank {group['role']['rank']}"
             if group['role']['rank'] == 255:
-                icon = "<:HisokaSeal:1118224760636190812>\n"
+                icon = "<:goldverify:1125557533550063646>\n"
             elif group['role']['rank'] > 10:
-                icon = "<:HisokaSeal:1118224760636190812>\n"
+                icon = "<:blueverify:1125557536267960361>\n"
             elif group['role']['rank'] > 1:
-                icon = "<:AezijiSeal:1118224784598241380>\n"
+                icon = "<:greyverify:1125557537958273065>\n"
             else:
                 icon = "\n"
             description += icon
@@ -337,7 +337,7 @@ class JoinManager(commands.Cog):
             if not self.current_embed:
                 updated_embed = await self.get_home_embed(self.user, self.border_colour)
             else:
-                updated_embed = self.current_embed(self.user, self.border_colour)
+                updated_embed = await self.current_embed(self.user, self.border_colour)
             await interaction.message.edit(embed=updated_embed, view=self)
             await interaction.response.defer()
 
@@ -373,7 +373,7 @@ class JoinManager(commands.Cog):
             if not self.current_embed:
                 updated_embed = await self.get_home_embed(self.user, self.border_colour)
             else:
-                updated_embed = self.current_embed(self.user, self.border_colour)
+                updated_embed = await self.current_embed(self.user, self.border_colour)
             await interaction.message.edit(embed=updated_embed, view=self)
             await interaction.response.defer()
 
