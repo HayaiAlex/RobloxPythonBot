@@ -45,7 +45,6 @@ class JoinManager(commands.Cog):
             join_requests = self.get_join_requests()
             for join_request in join_requests:
                 user = User(join_request.get('requester'))
-                user.id = 1717957596
                 user.requested_at = join_request.get('created')
                 print(user)
                 # check if join request is already in discord channel
