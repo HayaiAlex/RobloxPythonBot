@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 import discord, os, json, aiohttp
 from lib.discord_functions import DiscordManager
 from lib.progression import check_for_promotions
-from lib.roblox.roblox_functions import get_roblox_ids
+from lib.roblox.roblox_functions import get_roblox_ids, get_avatar_thumbnail
 from lib.sql.queries import DB
 
 Auth = os.getenv('AUTH')
@@ -46,6 +46,29 @@ class Webserver(commands.Cog):
 
                 return web.Response(status=200,content_type="application/json", body=data)
             except:
+                return web.Response(status=404)
+
+        @routes.get('/avatar', allow_head=False)
+        async def get_avatar(request):
+            try:
+                print(f"getting avatar for {request.query.get('id')}")
+                user_id = request.query.get('id')
+
+                avatar_type = request.query.get('type')
+                if not avatar_type:
+                    avatar_type = 'bust'
+
+                size = request.query.get('size')
+                if not size:
+                    size = 150
+
+                circular = request.query.get('circular')
+                if not circular:
+                    circular = False
+                avatar = await get_avatar_thumbnail(user_id, avatar_type, size, circular)
+
+                return web.Response(status=200, text=avatar)
+            except Exception as e:
                 return web.Response(status=404)
             
         @routes.post('/update-user')

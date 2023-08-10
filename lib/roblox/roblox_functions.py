@@ -7,17 +7,21 @@ PRISM_API = os.getenv('PRISM_API')
 COOKIE = os.getenv('COOKIE')
 db = DB()
 
-async def get_avatar_thumbnail(id, type='bust'):
+async def get_avatar_thumbnail(id, type='bust', size=150, circular=False):
     # get the user's avatar
-    if type == 'full':
-        url = f"https://thumbnails.roblox.com/v1/users/avatar?userIds={id}&size=150x150&format=Png&isCircular=false"
+    if circular:
+        circular = 'true'
     else:
-        url = f"https://thumbnails.roblox.com/v1/users/avatar-{type}?userIds={id}&size=150x150&format=Png&isCircular=false"
+        circular = 'false'
     
+    if type == 'full':
+        url = f"https://thumbnails.roblox.com/v1/users/avatar?userIds={id}&size={size}x{size}&format=Png&isCircular={circular}"
+    else:
+        url = f"https://thumbnails.roblox.com/v1/users/avatar-{type}?userIds={id}&size={size}x{size}&format=Png&isCircular={circular}"
     request = requests.get(url)
     response = request.json()
     avatar_url = response['data'][0]['imageUrl']
-
+    
     return avatar_url
 
 def has_uniform(user):
